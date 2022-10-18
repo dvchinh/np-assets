@@ -23,7 +23,7 @@ var $this = {
     },
     FetchInfo: function (path) {
         let url  = `https://playconsolemonetization-pa.clients6.google.com/v1/developer/${this['dev_id']}`;
-            url += `/${path}?%24httpHeaders=Content-Type%3Aapplication%2Fjson%2Bprotobuf%0D%0AX-Goog-Api-Key%3AAIzaSyBAha_rcoO_aGsmiR5fWbNfdOjqT0gXwbk%0D%0AX-Play-Console-Session-Id%3A4F012EE8%0D%0AX-Goog-AuthUser%3A0%0D%0AAuthorization%3A${this['dev_auth']}%0D%0A`;
+            url += `/${path}?%24httpHeaders=Content-Type%3Aapplication%2Fjson%2Bprotobuf%0D%0AX-Goog-Api-Key%3AAIzaSyBAha_rcoO_aGsmiR5fWbNfdOjqT0gXwbk%0D%0AX-Play-Console-Session-Id%3A7BD277B7%0D%0AX-Goog-AuthUser%3A0%0D%0AAuthorization%3A${this['dev_auth']}%0D%0A`;
         return { url };
     },
     FetchAuth: function() {
@@ -329,7 +329,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth: ${$this['dev_auth']}`);
         });
     },
-    version: "0.0.7",
+    version: "0.0.8",
 };
 window['NPGPC'] = $this;
 })();
