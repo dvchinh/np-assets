@@ -308,7 +308,7 @@ var $this = {
                     setTimeout(resolve, 5 * 1000, "foo"); });
             }
         } while (page);
-        console.log(`[ np-gpc ] orders =`, orders);
+        console.log(`[ np-gpc ] orders:`, orders);
 
         let orders_rf = orders.filter(item => ["da tinh phi", ""].includes(item['status']));
         for (let i = 0; i < orders_rf.length; i++) {
@@ -319,6 +319,7 @@ var $this = {
             }
             console.log(`[ np-gpc ] ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, product: ${order['p-name'].join(" > ")}, status: ${order['status']}, result:`, result);
         }
+        console.log(`[ np-gpc ] orders-rf:`, orders_rf);
         return orders;
     },
     StartProcess: function() {
@@ -328,7 +329,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth: ${$this['dev_auth']}`);
         });
     },
-    version: "0.0.6",
+    version: "0.0.7",
 };
 window['NPGPC'] = $this;
 })();
