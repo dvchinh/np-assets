@@ -114,7 +114,8 @@ var $this = {
                         if (item['2'] && item['3'] === 4) { status = "da tinh phi"; }
                         if (item['2'] && item['3'] === 5) { status = "dang xu ly giao dich hoan tien"; }
                         if (item['2'] && item['3'] === 6) { status = "da hoan tien"; }
-                        if (item['2'] && item['3'] === 7) { status = "da hoan lai mot phan tien"; };
+                        if (item['2'] && item['3'] === 7) { status = "da hoan lai mot phan tien"; }
+                        if (item['2'] && item['3'] === 8) { status = "dang xu ly giao dich hoan tien mot phan"; }
                         if (item['5'] === 1) { status = "tien tra bi tu choi"; }
                         let currency = item['15']['1'];
                         let amount  = parseInt(item['15']['2'] || "0");
