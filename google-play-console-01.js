@@ -1,4 +1,5 @@
-var NPGPC = {
+(function() {
+var $this = {
     dev_id: "7732272048818531913",
     dev_auth: "SAPISIDHASH+1666020513558_ff1f54703aeaf8dff1f14261210087009d92c10e",
     utils: {
@@ -28,7 +29,7 @@ var NPGPC = {
     OrderList: function (page, oid = "") {
         let message = "";
         return new Promise((resolve, reject) => {
-            let url = this.FetchInfo("orders:fetch")['url'];
+            let url = $this.FetchInfo("orders:fetch")['url'];
             let body =
             {
                 "4": {
@@ -103,7 +104,7 @@ var NPGPC = {
     OrderRefund: function (order) {
         let message = "";
         return new Promise((resolve, reject) => {
-            let url = this.FetchInfo("orders:refund")['url'];
+            let url = $this.FetchInfo("orders:refund")['url'];
             let body =
             {
                 "6": 1,
@@ -163,7 +164,7 @@ var NPGPC = {
     RefundStart: async function(refund) {
         let orders = [], page = "";
         do {
-            let result = await this.OrderList(page);
+            let result = await $this.OrderList(page);
             orders = orders.concat(result['orders']);
             console.log(`[ np-gpc ] orders.length: ${orders.length}, result:`, result, );
             page = result['page-next']; if (page) {
@@ -178,7 +179,7 @@ var NPGPC = {
             let order = orders_rf[i];
             let result = null;
             if (refund) {
-                result = await this.OrderRefund(order);
+                result = await $this.OrderRefund(order);
             }
             console.log(`[ np-gpc ] ${i + 1}. id: ${order['id']}, rf-param: ${order['rf-param']}, amount: ${order['amount']} ${order['currency']}, product: ${order['p-name'].join(" > ")}, status: ${order['status']}, result:`, result);
         }
@@ -195,7 +196,7 @@ var NPGPC = {
                     let reg = new RegExp("/developers/(\\d+)/[^\\?]+\\?([\\s\\S]+)", "i"), exec = reg.exec(url);
                     if (exec) {
                         let id = exec[1];
-                        let headers = this.utils.getUrlParameter("$httpHeaders", exec[2]);
+                        let headers = $this.utils.getUrlParameter("$httpHeaders", exec[2]);
                         console.log(`[ xhr ] id: ${id}, headers: ${headers}`);
                     }
                 }
@@ -205,4 +206,6 @@ var NPGPC = {
     },
     version: "0.0.1",
 };
-NPGPC.StartProcess.bind(NPGPC)();
+window['NPGPC'] = $this;
+})();
+NPGPC.StartProcess();
