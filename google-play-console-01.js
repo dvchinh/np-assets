@@ -209,6 +209,94 @@ var $this = {
             });
         });
     },
+    OrderRefundMulti: async function (orders) {
+        let url = $this.FetchInfo("orders:refund")['url'];
+        let body = {
+            "6": 1,
+            "7": "",
+            "8": [],
+            "10": {
+                "1": $this['dev_id']
+            },
+            "11": [{}]
+        };
+        let famount = function (order) {
+            let ovalue = { '1': order['id'] };
+            let percent = order['rf-percent'];
+            if (percent) {
+                let amount = order['amount'] * percent / 100;
+                let amount_odd = amount % 1 * 1000000000
+                ovalue['3'] = {
+                    '1': order['currency'],
+                    '2': parseInt(amount).toString()
+                };
+                if (amount_odd) {
+                    ovalue['3']['3'] = amount_odd;
+                }
+                amount['4'] = `${order['id']}:0`;
+                amount['5'] = order['rf-param'][0];
+            }
+            if (!percent) {
+                ovalue['2'] = false;
+            }
+            return ovalue;
+        };
+        for (let i = 0; i < orders.length; i++) {
+            let order = orders[i];
+            if (typeof order === 'string') {
+                let result = await $this.OrderList("", order);
+                order = result['orders'][0];
+                orders[i] = order;
+            }
+            if (['VND'].includes(order['currency'])) {
+                order['rf-percent'] = 99;
+            }
+            console.log(`[ np-gpc ] refund | ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, rf-percent: ${order['rf-percent'] || 100}%`);
+
+            body['8'].push(famount(order));
+            if (!i) {
+                body['11'][0]['1'] = order['rf-param'][1];
+            }
+        }
+        let message = "";
+        return new Promise((resolve, reject) => {
+            fetch(url, {
+            "headers": {
+                "accept": "*/*",
+                "accept-language": "vi",
+                "content-type": "text/plain;charset=UTF-8",
+                "sec-ch-ua": "\"Chromium\";v=\"106\", \"Google Chrome\";v=\"106\", \"Not;A=Brand\";v=\"99\"",
+                "sec-ch-ua-mobile": "?0",
+                "sec-ch-ua-platform": "\"Windows\"",
+                "sec-fetch-dest": "empty",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-site",
+                "x-client-data": "CKO1yQEIirbJAQimtskBCMG2yQEIqZ3KAQjd08oBCML5ygEIkqHLAQi2vMwBCJq9zAEI48vMAQiL3cwBCPHfzAEIw+HMAQjH48wBCMTkzAEI+ujMAQ=="
+            },
+            "referrer": "https://play.google.com/",
+            "referrerPolicy": "strict-origin-when-cross-origin",
+            "body": JSON.stringify(body, null, 0),
+            "method": "POST",
+            "mode": "cors",
+            "credentials": "include"
+            }).then(res => {
+                if (res.ok) { res.json().then(dataf => {
+                    // -: console.log(`[ google-play-console ] data:`, dataf);
+                    if (dataf['2'] === 1) {
+                        reject(dataf);
+                    } else {
+                        resolve(dataf);
+                    }
+                }); } else {
+                    message = `The process has been occurred an exception [ status = ${res.status} ]`;
+                    reject(message);
+                }
+            }).catch(err => {
+                message = `The process has been occurred an exception [ message= ${err.message}, stack = ${err.stack} ]`;
+                reject(message);
+            });
+        });
+    },
     RefundStart: async function(refund) {
         let orders = [], page = "";
         do {
@@ -229,7 +317,7 @@ var $this = {
             if (refund) {
                 result = await $this.OrderRefund(order);
             }
-            console.log(`[ np-gpc ] ${i + 1}. id: ${order['id']}, rf-param: ${order['rf-param']}, amount: ${order['amount']} ${order['currency']}, product: ${order['p-name'].join(" > ")}, status: ${order['status']}, result:`, result);
+            console.log(`[ np-gpc ] ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, product: ${order['p-name'].join(" > ")}, status: ${order['status']}, result:`, result);
         }
         return orders;
     },
@@ -240,7 +328,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth: ${$this['dev_auth']}`);
         });
     },
-    version: "0.0.4",
+    version: "0.0.5",
 };
 window['NPGPC'] = $this;
 })();
