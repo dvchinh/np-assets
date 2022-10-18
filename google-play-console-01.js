@@ -1,6 +1,25 @@
 var NPGPC = {
     dev_id: "7732272048818531913",
     dev_auth: "SAPISIDHASH+1666020513558_ff1f54703aeaf8dff1f14261210087009d92c10e",
+    utils: {
+        getUrlParameter: (pName, pUrl) => {
+            var value = null;
+            var name = encodeURIComponent(pName).toLowerCase();
+            var url = 'undefined' !== typeof pUrl ? pUrl : window.location.href;
+            var reg = new RegExp("([^\\?#]*)(\\?[^#]*)?(#.*)?", "gi"), exec = reg.exec(url), search = exec[2];
+            if ('undefined' !== typeof search) {
+                var array = search.substr(1).split("&");
+                for (i = 0; i < array.length; i++) {
+                    var item = array[i];
+                    var index = item.indexOf("=");
+                    if (item.substr(0, index).toLowerCase() === name) {
+                        value = item.substr(index + 1); break;
+                    }
+                }
+            }
+            return value ? decodeURIComponent(value) : value;
+        },
+    },
     FetchInfo: function(path) {
         let url  = `https://playconsolemonetization-pa.clients6.google.com/v1/developer/${this['dev_id']}`;
             url += `/${path}?%24httpHeaders=Content-Type%3Aapplication%2Fjson%2Bprotobuf%0D%0AX-Goog-Api-Key%3AAIzaSyBAha_rcoO_aGsmiR5fWbNfdOjqT0gXwbk%0D%0AX-Play-Console-Session-Id%3A4F012EE8%0D%0AX-Goog-AuthUser%3A0%0D%0AAuthorization%3A${this['dev_auth']}%0D%0A`;
@@ -170,7 +189,16 @@ var NPGPC = {
         (function (xhr) {
             var open = XMLHttpRequest.prototype.open;
             xhr.prototype.open = function() {
-              console.log(`[ xhr ] arguments:`, arguments);  
+                console.log(`[ xhr ] arguments:`, arguments);
+                if (!this['dev_id'] && !this['dev_auth']) {
+                    let url = decodeURIComponent(arguments[1]);
+                    let reg = new RegExp("/developers/(\\d+)/[^\\?]+\\?([\\s\\S]+)", "i"), exec = reg.exec(url);
+                    if (exec) {
+                        let id = exec[1];
+                        let headers = this.utils.getUrlParameter("$httpHeaders", exec[2]);
+                        console.log(`[ xhr ] id: ${id}, headers: ${headers}`);
+                    }
+                }
                 open.apply(this, arguments);
             };
         })(XMLHttpRequest);
