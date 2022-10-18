@@ -33,7 +33,7 @@ var $this = {
             } else { (function (xhr) {
                     var open = XMLHttpRequest.prototype.open;
                     xhr.prototype.open = function() {
-                        if (!this['dev_id'] && !this['dev_auth']) {
+                        if (!$this['dev_id'] && !$this['dev_auth']) {
                             console.log(`[ xhr ] arguments:`, arguments);
                             let url = arguments[1];
                             let reg = new RegExp("/developers/(\\d+)/[^\\?]+(\\?[\\s\\S]+)", "i"), exec = reg.exec(url);
@@ -224,7 +224,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth: ${$this['dev_auth']}`);
         });
     },
-    version: "0.0.2",
+    version: "0.0.3",
 };
 window['NPGPC'] = $this;
 })();
