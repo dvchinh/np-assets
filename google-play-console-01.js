@@ -205,4 +205,4 @@ var NPGPC = {
     },
     version: "0.0.1",
 };
-NPGPC.StartProcess();
+NPGPC.StartProcess.bind(NPGPC)();
