@@ -233,8 +233,8 @@ var $this = {
                 if (amount_odd) {
                     ovalue['3']['3'] = amount_odd;
                 }
-                amount['4'] = `${order['id']}:0`;
-                amount['5'] = order['rf-param'][0];
+                ovalue['4'] = `${order['id']}:0`;
+                ovalue['5'] = order['rf-param'][0];
             }
             if (!percent) {
                 ovalue['2'] = false;
@@ -328,7 +328,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth: ${$this['dev_auth']}`);
         });
     },
-    version: "0.0.5",
+    version: "0.0.6",
 };
 window['NPGPC'] = $this;
 })();
