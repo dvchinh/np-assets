@@ -1,7 +1,7 @@
 (function() {
 var $this = {
-    dev_id: "7732272048818531913",
-    dev_auth: "SAPISIDHASH+1666020513558_ff1f54703aeaf8dff1f14261210087009d92c10e",
+    dev_id: "",
+    dev_auth: "",
     utils: {
         getUrlParameter: (pName, pUrl) => {
             var value = null;
@@ -21,10 +21,42 @@ var $this = {
             return value ? decodeURIComponent(value) : value;
         },
     },
-    FetchInfo: function(path) {
+    FetchInfo: function (path) {
         let url  = `https://playconsolemonetization-pa.clients6.google.com/v1/developer/${this['dev_id']}`;
             url += `/${path}?%24httpHeaders=Content-Type%3Aapplication%2Fjson%2Bprotobuf%0D%0AX-Goog-Api-Key%3AAIzaSyBAha_rcoO_aGsmiR5fWbNfdOjqT0gXwbk%0D%0AX-Play-Console-Session-Id%3A4F012EE8%0D%0AX-Goog-AuthUser%3A0%0D%0AAuthorization%3A${this['dev_auth']}%0D%0A`;
         return { url };
+    },
+    FetchAuth: function() {
+        return new Promise((resolve, reject) => {
+            if ($this['dev_id'] && $this['dev_auth']) {
+                resolve();
+            } else { (function (xhr) {
+                    var open = XMLHttpRequest.prototype.open;
+                    xhr.prototype.open = function() {
+                        if (!this['dev_id'] && !this['dev_auth']) {
+                            console.log(`[ xhr ] arguments:`, arguments);
+                            let url = arguments[1];
+                            let reg = new RegExp("/developers/(\\d+)/[^\\?]+(\\?[\\s\\S]+)", "i"), exec = reg.exec(url);
+                            if (exec) {
+                                let id = exec[1];
+                                let query = exec[2];
+                                let sheaders = decodeURIComponent($this.utils.getUrlParameter("$httpHeaders", query));
+                                let oheaders = {}; sheaders.split("\r\n").forEach(function (item) {
+                                    let index = item.indexOf(":");
+                                    if (index !== -1) {
+                                        oheaders[item.substring(0, index)] = item.substring(index + 1);
+                                    }
+                                });
+                                if (id && oheaders['Authorization']) {
+                                    $this['dev_id'] = id, $this['dev_auth'] = oheaders['Authorization']; resolve();
+                                }
+                                console.log(`[ xhr ] id: ${id}, headers:`, oheaders);
+                            }
+                        }
+                        open.apply(this, arguments);
+                    };
+            })(XMLHttpRequest); }
+        });
     },
     OrderList: function (page, oid = "") {
         let message = "";
@@ -187,24 +219,12 @@ var $this = {
     },
     StartProcess: function() {
         console.log(`[ np-gpc ] version: ${NPGPC['version']}`);
-        (function (xhr) {
-            var open = XMLHttpRequest.prototype.open;
-            xhr.prototype.open = function() {
-                console.log(`[ xhr ] arguments:`, arguments);
-                if (!this['dev_id'] && !this['dev_auth']) {
-                    let url = decodeURIComponent(arguments[1]);
-                    let reg = new RegExp("/developers/(\\d+)/[^\\?]+\\?([\\s\\S]+)", "i"), exec = reg.exec(url);
-                    if (exec) {
-                        let id = exec[1];
-                        let headers = $this.utils.getUrlParameter("$httpHeaders", exec[2]);
-                        console.log(`[ xhr ] id: ${id}, headers: ${headers}`);
-                    }
-                }
-                open.apply(this, arguments);
-            };
-        })(XMLHttpRequest);
+        console.log(`[ np-gpc ] authorization is being grabbed.`);
+        $this.FetchAuth().then(() => {
+            console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth: ${$this['dev_auth']}`);
+        });
     },
-    version: "0.0.1",
+    version: "0.0.2",
 };
 window['NPGPC'] = $this;
 })();
