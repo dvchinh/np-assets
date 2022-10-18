@@ -1,14 +1,16 @@
-console.clear();
 var NPGPC = {
     dev_id: "7732272048818531913",
     dev_auth: "SAPISIDHASH+1666020513558_ff1f54703aeaf8dff1f14261210087009d92c10e",
-    base_url: `https://playconsolemonetization-pa.clients6.google.com/v1/developer/${dev_id}`,
-
+    FetchInfo: function(path) {
+        let url  = `https://playconsolemonetization-pa.clients6.google.com/v1/developer/${this['dev_id']}`;
+            url += `/${path}?%24httpHeaders=Content-Type%3Aapplication%2Fjson%2Bprotobuf%0D%0AX-Goog-Api-Key%3AAIzaSyBAha_rcoO_aGsmiR5fWbNfdOjqT0gXwbk%0D%0AX-Play-Console-Session-Id%3A4F012EE8%0D%0AX-Goog-AuthUser%3A0%0D%0AAuthorization%3A${this['dev_auth']}%0D%0A`;
+        return { url };
+    },
     OrderList: function (page, oid = "") {
         let message = "";
         return new Promise((resolve, reject) => {
-            var url = `${base_url}/orders:fetch?%24httpHeaders=Content-Type%3Aapplication%2Fjson%2Bprotobuf%0D%0AX-Goog-Api-Key%3AAIzaSyBAha_rcoO_aGsmiR5fWbNfdOjqT0gXwbk%0D%0AX-Play-Console-Session-Id%3A4F012EE8%0D%0AX-Goog-AuthUser%3A0%0D%0AAuthorization%3A${dev_auth}%0D%0A`;
-            var body =
+            let url = this.FetchInfo("orders:fetch")['url'];
+            let body =
             {
                 "4": {
                     "1": {
@@ -22,7 +24,7 @@ var NPGPC = {
                     "3": oid
                 },
                 "5": {
-                    "1": dev_id
+                    "1": this['dev_id']
                 },
                 "7": page,
                 "8": 25
@@ -82,8 +84,8 @@ var NPGPC = {
     OrderRefund: function (order) {
         let message = "";
         return new Promise((resolve, reject) => {
-            var url = `${base_url}/orders:refund?%24httpHeaders=Content-Type%3Aapplication%2Fjson%2Bprotobuf%0D%0AX-Goog-Api-Key%3AAIzaSyBAha_rcoO_aGsmiR5fWbNfdOjqT0gXwbk%0D%0AX-Play-Console-Session-Id%3A4F012EE8%0D%0AX-Goog-AuthUser%3A0%0D%0AAuthorization%3A${dev_auth}%0D%0A`;
-            var body =
+            let url = this.FetchInfo("orders:refund")['url'];
+            let body =
             {
                 "6": 1,
                 "7": "",
@@ -94,7 +96,7 @@ var NPGPC = {
                     }
                 ],
                 "10": {
-                    "1": dev_id
+                    "1": this['dev_id']
                 },
                 "11": [
                     {
@@ -142,24 +144,24 @@ var NPGPC = {
     RefundStart: async function(refund) {
         let orders = [], page = "";
         do {
-            let result = await OrderList(page);
+            let result = await this.OrderList(page);
             orders = orders.concat(result['orders']);
-            console.log(`[ google-play-console ] orders.length: ${orders.length}, result:`, result, );
+            console.log(`[ np-gpc ] orders.length: ${orders.length}, result:`, result, );
             page = result['page-next']; if (page) {
                 await new Promise((resolve, reject) =>{
                     setTimeout(resolve, 5 * 1000, "foo"); });
             }
         } while (page);
-        console.log(`[ google-play-console ] orders =`, orders);
+        console.log(`[ np-gpc ] orders =`, orders);
 
         let orders_rf = orders.filter(item => ["da tinh phi", ""].includes(item['status']));
         for (let i = 0; i < orders_rf.length; i++) {
             let order = orders_rf[i];
             let result = null;
             if (refund) {
-                result = await OrderRefund(order);
+                result = await this.OrderRefund(order);
             }
-            console.log(`[ google-play-console ] ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, product: ${order['p-name'].join(" > ")}, status: ${order['status']}, result:`, result);
+            console.log(`[ np-gpc ] ${i + 1}. id: ${order['id']}, rf-param: ${order['rf-param']}, amount: ${order['amount']} ${order['currency']}, product: ${order['p-name'].join(" > ")}, status: ${order['status']}, result:`, result);
         }
         return orders;
     },
