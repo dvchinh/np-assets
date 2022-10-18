@@ -169,7 +169,7 @@ var $this = {
                     body['8'][0]['3']['3'] = amount_odd;
                 }
                 body['8'][0]['4'] = `${order['id']}:0`;
-                body['9'][0]['5'] = order['rf-param'][0];
+                body['8'][0]['5'] = order['rf-param'][0];
             }
             fetch(url, {
             "headers": {
