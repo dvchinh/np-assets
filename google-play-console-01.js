@@ -114,12 +114,13 @@ var $this = {
                         if (item['2'] && item['3'] === 4) { status = "da tinh phi"; }
                         if (item['2'] && item['3'] === 5) { status = "dang xu ly giao dich hoan tien"; }
                         if (item['2'] && item['3'] === 6) { status = "da hoan tien"; }
+                        if (item['2'] && item['3'] === 7) { status = "da hoan lai mot phan tien"; };
                         if (item['5'] === 1) { status = "tien tra bi tu choi"; }
                         let currency = item['15']['1'];
                         let amount  = parseInt(item['15']['2'] || "0");
                             amount += (item['15']['3'] || 0) / 1000000000;
                         let pname = [ item['11']['1'], item['11']['2'] ];
-                        let rfparam = item['23']['1'];
+                        let rfparam = [ item['22'], item['23']['1'] ];
                         return { 'id': id, 'time': time, 'status': status, amount: amount, 'currency': currency, 'rf-param': rfparam, 'p-name': pname };
                     });
                     resolve(data);
@@ -133,18 +134,16 @@ var $this = {
             });
         });
     },
-    OrderRefund: function (order) {
+    OrderRefund: function (order, percent) {
         let message = "";
         return new Promise((resolve, reject) => {
             let url = $this.FetchInfo("orders:refund")['url'];
-            let body =
-            {
+            let body = {
                 "6": 1,
                 "7": "",
                 "8": [
                     {
-                        "1": order['id'],
-                        "2": false
+                        "1": order['id']
                     }
                 ],
                 "10": {
@@ -152,9 +151,25 @@ var $this = {
                 },
                 "11": [
                     {
-                        "1": order['rf-param']
+                        "1": order['rf-param'][1]
                     }
                 ]
+            };
+            if (!percent) {
+                body['8'][0]['2'] = false;
+            }
+            if ( percent) {
+                let amount = order['amount'] * percent / 100;
+                let amount_odd = amount % 1 * 1000000000
+                body['8'][0]['3'] = {
+                    '1': order['currency'],
+                    '2': parseInt(amount).toString()
+                };
+                if (amount_odd) {
+                    body['8'][0]['3']['3'] = amount_odd;
+                }
+                body['8'][0]['4'] = `${order['id']}:0`;
+                body['9'][0]['5'] = order['rf-param'][0];
             }
             fetch(url, {
             "headers": {
@@ -224,7 +239,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth: ${$this['dev_auth']}`);
         });
     },
-    version: "0.0.3",
+    version: "0.0.4",
 };
 window['NPGPC'] = $this;
 })();
