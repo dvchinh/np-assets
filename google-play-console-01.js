@@ -331,10 +331,9 @@ var $this = {
             if (refund) {
                 result = await $this.OrderRefund(order);
             }
-            console.log(`[ np-gpc ] ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, product: ${order['p-name'].join(" > ")}, status: ${order['status']}, result:`, result);
+            console.log(`[ np-gpc ] ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, status: ${order['status']}, result:`, result);
         }
         console.log(`[ np-gpc ] orders-rf:`, orders_rf);
-        return orders;
     },
     StartProcess: function() {
         console.log(`[ np-gpc ] version: ${NPGPC['version']}`);
@@ -343,7 +342,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth:`, $this['dev_auth']);
         });
     },
-    version: "0.1.3",
+    version: "0.1.4",
 };
 window['NPGPC'] = $this;
 })();
