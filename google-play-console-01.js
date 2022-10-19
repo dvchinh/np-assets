@@ -1,7 +1,7 @@
 (function() {
 var $this = {
     dev_id: "",
-    dev_auth: "",
+    dev_auth: null,
     utils: {
         getUrlParameter: (pName, pUrl) => {
             var value = null;
@@ -22,8 +22,12 @@ var $this = {
         },
     },
     FetchInfo: function (path) {
-        let url  = `https://playconsolemonetization-pa.clients6.google.com/v1/developer/${this['dev_id']}`;
-            url += `/${path}?%24httpHeaders=Content-Type%3Aapplication%2Fjson%2Bprotobuf%0D%0AX-Goog-Api-Key%3AAIzaSyBAha_rcoO_aGsmiR5fWbNfdOjqT0gXwbk%0D%0AX-Play-Console-Session-Id%3A7BD277B7%0D%0AX-Goog-AuthUser%3A0%0D%0AAuthorization%3A${this['dev_auth']}%0D%0A`;
+        let headers = []; for (let name in $this['dev_auth']) {
+            headers.push(`${name}:${$this['dev_auth'][name]}`);
+        }
+        let url  = `https://playconsolemonetization-pa.clients6.google.com/v1/developer`
+            url += `/${$this['dev_id']}/${path}`;
+            url += `?${decodeURIComponent("$httpHeaders")}=${decodeURIComponent(headers.join("\r\n") + "\r\n")}`;
         return { url };
     },
     FetchAuth: function() {
@@ -48,7 +52,7 @@ var $this = {
                                     }
                                 });
                                 if (id && oheaders['Authorization']) {
-                                    $this['dev_id'] = id, $this['dev_auth'] = oheaders['Authorization']; resolve();
+                                    $this['dev_id'] = id, $this['dev_auth'] = oheaders; resolve();
                                 }
                                 console.log(`[ xhr ] id: ${id}, headers:`, oheaders);
                             }
@@ -251,8 +255,11 @@ var $this = {
             if (['VND'].includes(order['currency'])) {
                 order['rf-percent'] = 99;
             }
+            order['rf-reason'] = 1;
+            // '1': "nguoi mua hoi tiec", '2': "chua nhan duoc mat hang"
             console.log(`[ np-gpc ] refund | ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, rf-percent: ${order['rf-percent'] || 100}%`);
 
+            body['6'] = order['rf-reason'];
             body['8'].push(famount(order));
             if (!i) {
                 body['11'][0]['1'] = order['rf-param'][1];
@@ -326,10 +333,10 @@ var $this = {
         console.log(`[ np-gpc ] version: ${NPGPC['version']}`);
         console.log(`[ np-gpc ] authorization is being grabbed.`);
         $this.FetchAuth().then(() => {
-            console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth: ${$this['dev_auth']}`);
+            console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth:`, $this['dev_auth']);
         });
     },
-    version: "0.0.8",
+    version: "0.0.9",
 };
 window['NPGPC'] = $this;
 })();
