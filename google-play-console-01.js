@@ -261,7 +261,7 @@ var $this = {
                 order['rf-percent'] = 99;
             }
             order['rf-reason'] = 1;
-            // '1': "nguoi mua hoi tiec", '2': "chua nhan duoc mat hang"
+            // '1': "nguoi mua hoi tiec", '2': "chua nhan duoc mat hang", '3': "san pham bi loi", '4': "mua hang ngau nhien"
             console.log(`[ np-gpc ] refund | ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, rf-percent: ${order['rf-percent'] || 100}%`);
 
             body['6'] = order['rf-reason'];
@@ -322,7 +322,9 @@ var $this = {
         } while (page);
         console.log(`[ np-gpc ] orders:`, orders);
 
-        let orders_rf = orders.filter(item => ["da tinh phi", ""].includes(item['status']));
+        let orders_rf = orders
+            .filter(item => ["da tinh phi", ""].includes(item['status']))
+            .sort((a, b) => (b['amount'] - a['amount']));
         for (let i = 0; i < orders_rf.length; i++) {
             let order = orders_rf[i];
             let result = null;
@@ -341,7 +343,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth:`, $this['dev_auth']);
         });
     },
-    version: "0.1.2",
+    version: "0.1.3",
 };
 window['NPGPC'] = $this;
 })();
