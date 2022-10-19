@@ -23,11 +23,17 @@ var $this = {
     },
     FetchInfo: function (path) {
         let headers = []; for (let name in $this['dev_auth']) {
-            headers.push(`${name}:${$this['dev_auth'][name]}`);
+            let hname = encodeURIComponent(name),
+                hvalue = $this['dev_auth'][name];
+            if (![ "Authorization" ].includes(name)) {
+                hvalue = encodeURIComponent(hvalue);
+            };
+            headers.push(`${hname}:${hvalue}`);
         }
+        let nline = encodeURIComponent("\r\n");
         let url  = `https://playconsolemonetization-pa.clients6.google.com/v1/developer`
             url += `/${$this['dev_id']}/${path}`;
-            url += `?${encodeURIComponent("$httpHeaders")}=${encodeURIComponent(headers.join("\r\n") + "\r\n")}`;
+            url += `?${encodeURIComponent("$httpHeaders")}=${headers.join(nline) + nline}`;
         return { url };
     },
     FetchAuth: function() {
@@ -336,7 +342,7 @@ var $this = {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth:`, $this['dev_auth']);
         });
     },
-    version: "0.1.0",
+    version: "0.1.1",
 };
 window['NPGPC'] = $this;
 })();
