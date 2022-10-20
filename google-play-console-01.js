@@ -261,7 +261,7 @@ var $this = {
                 order['rf-percent'] = 99;
             }
             order['rf-reason'] = 1;
-            // '1': "nguoi mua hoi tiec", '2': "chua nhan duoc mat hang", '3': "san pham bi loi", '4': "mua hang ngau nhien"
+            // '1': "nguoi mua hoi tiec", '2': "chua nhan duoc mat hang", '3': "san pham bi loi", '4': "mua hang ngau nhien", '5': "don dat hang gian lan", '6': "gian lan khong co y", '7': "khac"
             console.log(`[ np-gpc ] refund | ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, rf-percent: ${order['rf-percent'] || 100}%`);
 
             body['6'] = order['rf-reason'];
