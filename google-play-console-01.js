@@ -298,7 +298,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.1.6",
+    version: "0.1.7",
 };
 window['NPGPC'] = $this;
 })();
