@@ -1,7 +1,7 @@
 (function() {
 var $this = {
-    dev_id: "",
-    dev_auth: null,
+    dev_id: "", dev_auth: null,
+    'orders': [], 'orders-rf': [],
     utils: {
         getUrlParameter: (pName, pUrl) => {
             var value = null;
@@ -144,81 +144,26 @@ var $this = {
             });
         });
     },
-    OrderRefund: function (order, percent) {
-        let message = "";
-        return new Promise((resolve, reject) => {
-            let url = $this.FetchInfo("orders:refund")['url'];
-            let body = {
-                "6": 1,
-                "7": "",
-                "8": [
-                    {
-                        "1": order['id']
-                    }
-                ],
-                "10": {
-                    "1": this['dev_id']
-                },
-                "11": [
-                    {
-                        "1": order['rf-param'][1]
-                    }
-                ]
-            };
-            if (!percent) {
-                body['8'][0]['2'] = false;
+    OrderFill: async function () {
+        let orders = [], page = "";
+        do {
+            let result = await $this.OrderList(page);
+            orders = orders.concat(result['orders']);
+            console.log(`[ np-gpc ] orders.length: ${orders.length}, result:`, result, );
+            page = result['page-next']; if (page) {
+                await new Promise((resolve, reject) =>{
+                    setTimeout(resolve, 5 * 1000, "foo"); });
             }
-            if ( percent) {
-                let amount = order['amount'] * percent / 100;
-                let amount_odd = amount % 1 * 1000000000
-                body['8'][0]['3'] = {
-                    '1': order['currency'],
-                    '2': parseInt(amount).toString()
-                };
-                if (amount_odd) {
-                    body['8'][0]['3']['3'] = amount_odd;
-                }
-                body['8'][0]['4'] = `${order['id']}:0`;
-                body['8'][0]['5'] = order['rf-param'][0];
-            }
-            fetch(url, {
-            "headers": {
-                "accept": "*/*",
-                "accept-language": "vi",
-                "content-type": "text/plain;charset=UTF-8",
-                "sec-ch-ua": "\"Chromium\";v=\"106\", \"Google Chrome\";v=\"106\", \"Not;A=Brand\";v=\"99\"",
-                "sec-ch-ua-mobile": "?0",
-                "sec-ch-ua-platform": "\"Windows\"",
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-site",
-                "x-client-data": "CKO1yQEIirbJAQimtskBCMG2yQEIqZ3KAQjd08oBCML5ygEIkqHLAQi2vMwBCJq9zAEI48vMAQiL3cwBCPHfzAEIw+HMAQjH48wBCMTkzAEI+ujMAQ=="
-            },
-            "referrer": "https://play.google.com/",
-            "referrerPolicy": "strict-origin-when-cross-origin",
-            "body": JSON.stringify(body, null, 0),
-            "method": "POST",
-            "mode": "cors",
-            "credentials": "include"
-            }).then(res => {
-                if (res.ok) { res.json().then(dataf => {
-                    // -: console.log(`[ google-play-console ] data:`, dataf);
-                    if (dataf['2'] === 1) {
-                        reject(dataf);
-                    } else {
-                        resolve(dataf);
-                    }
-                }); } else {
-                    message = `The process has been occurred an exception [ status = ${res.status} ]`;
-                    reject(message);
-                }
-            }).catch(err => {
-                message = `The process has been occurred an exception [ message= ${err.message}, stack = ${err.stack} ]`;
-                reject(message);
-            });
-        });
+        } while (page);
+        $this['orders'] = orders;
+
+        let orders_rf = orders
+            .filter(item => ["da tinh phi", ""].includes(item['status']))
+            .sort((a, b) => (b['amount'] - a['amount']));
+        $this['orders-rf'] = orders_rf;
+        console.log(`[ np-gpc ] orders.length: ${$this['orders'].length}, orders-rf:`, $this['orders-rf']);
     },
-    OrderRefundMulti: async function (orders) {
+    OrderRefund: async function (orders, test) {
         let url = $this.FetchInfo("orders:refund")['url'];
         let body = {
             "6": 1,
@@ -232,7 +177,7 @@ var $this = {
         let famount = function (order) {
             let ovalue = { '1': order['id'] };
             let percent = order['rf-percent'];
-            if (percent) {
+            if (percent !== 100) {
                 let amount = order['amount'] * percent / 100;
                 let amount_odd = amount % 1 * 1000000000
                 ovalue['3'] = {
@@ -245,7 +190,7 @@ var $this = {
                 ovalue['4'] = `${order['id']}:0`;
                 ovalue['5'] = order['rf-param'][0];
             }
-            if (!percent) {
+            if (percent === 100) {
                 ovalue['2'] = false;
             }
             return ovalue;
@@ -257,21 +202,30 @@ var $this = {
                 order = result['orders'][0];
                 orders[i] = order;
             }
-            if (['VND'].includes(order['currency'])) {
-                order['rf-percent'] = 99;
+            if (!order['rf-percent']) {
+                if (['VND'].includes(order['currency'])) {
+                    order['rf-percent'] = 99;
+                } else {
+                    order['rf-percent'] = 100;
+                }
             }
-            order['rf-reason'] = 1;
+            if (!order['rf-reason']) {
+                 order['rf-reason'] = 1;
+            }
             // '1': "nguoi mua hoi tiec", '2': "chua nhan duoc mat hang", '3': "san pham bi loi", '4': "mua hang ngau nhien", '5': "don dat hang gian lan", '6': "gian lan khong co y", '7': "khac"
-            console.log(`[ np-gpc ] refund | ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, rf-percent: ${order['rf-percent'] || 100}%`);
+            console.log(`[ np-gpc ] refund.item | ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, rf-percent: ${order['rf-percent']}%, rf-reason: ${order['rf-reason']}`);
 
-            body['6'] = order['rf-reason'];
             body['8'].push(famount(order));
             if (!i) {
+                body['6'] = order['rf-reason'];
                 body['11'][0]['1'] = order['rf-param'][1];
             }
         }
         let message = "";
         return new Promise((resolve, reject) => {
+            if (test) {
+                resolve({ test }); return;
+            }
             fetch(url, {
             "headers": {
                 "accept": "*/*",
@@ -309,40 +263,36 @@ var $this = {
             });
         });
     },
-    RefundStart: async function(refund) {
-        let orders = [], page = "";
-        do {
-            let result = await $this.OrderList(page);
-            orders = orders.concat(result['orders']);
-            console.log(`[ np-gpc ] orders.length: ${orders.length}, result:`, result, );
-            page = result['page-next']; if (page) {
-                await new Promise((resolve, reject) =>{
-                    setTimeout(resolve, 5 * 1000, "foo"); });
+    RefundStart: async function(paraml) {
+        let rf_test = !!paraml['rf-test'];
+        let rf_page_size = paraml['rf-page-size'] || 10;
+        let rf_page_times = paraml['rf-page-times'] || Number.MAX_SAFE_INTEGER;
+        let rf_list = [];
+        $this['orders-rf'].forEach(order => {
+            if (rf_list.length === 0 ||
+                rf_list[rf_list.length - 1].length === rf_page_size) {
+                rf_list.push([]);
             }
-        } while (page);
-        console.log(`[ np-gpc ] orders:`, orders);
+            rf_list[rf_list.length - 1].push(order);
+        });
+        console.log(`[ np-gpc ] refund.list | test: ${rf_test}, page-size: ${rf_page_size}, page-times: ${rf_page_times}, list:`, rf_list)
 
-        let orders_rf = orders
-            .filter(item => ["da tinh phi", ""].includes(item['status']))
-            .sort((a, b) => (b['amount'] - a['amount']));
-        for (let i = 0; i < orders_rf.length; i++) {
-            let order = orders_rf[i];
-            let result = null;
-            if (refund) {
-                result = await $this.OrderRefund(order);
-            }
-            console.log(`[ np-gpc ] ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, status: ${order['status']}, result:`, result);
+        for (let i = 0; i < rf_list.length; i++) {
+            if (rf_page_times === i) { break; }
+            let rf_item = rf_list[i];
+            let rf_result = $this.OrderRefund(rf_item, rf_test);
+            console.log(`[ np-gpc ] refund.list | ${i + 1}. orders:`, rf_item, `, result:`, rf_result);
         }
-        console.log(`[ np-gpc ] orders-rf:`, orders_rf);
     },
     StartProcess: function() {
         console.log(`[ np-gpc ] version: ${NPGPC['version']}`);
         console.log(`[ np-gpc ] authorization is being grabbed.`);
         $this.FetchAuth().then(() => {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth:`, $this['dev_auth']);
+            $this.OrderFill();
         });
     },
-    version: "0.1.4",
+    version: "0.1.5",
 };
 window['NPGPC'] = $this;
 })();
