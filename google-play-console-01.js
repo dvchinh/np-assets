@@ -268,6 +268,7 @@ var $this = {
         let rf_async = paraml['rf-async'];
         let rf_page_size = paraml['rf-page-size'] || 10;
         let rf_page_times = paraml['rf-page-times'] || Number.MAX_SAFE_INTEGER;
+        let rf_delay_time = paraml['rf-delay-time'] || 0;
         let rf_list = [];
         $this['orders-rf'].forEach(order => {
             if (rf_list.length === 0 ||
@@ -276,7 +277,7 @@ var $this = {
             }
             rf_list[rf_list.length - 1].push(order);
         });
-        console.log(`[ np-gpc ] refund.list | test: ${rf_test}, page-size: ${rf_page_size}, page-times: ${rf_page_times}, list:`, rf_list)
+        console.log(`[ np-gpc ] refund.list | test: ${rf_test}, page-size: ${rf_page_size}, page-times: ${rf_page_times}, delay-time: ${rf_delay_time}, list:`, rf_list)
 
         for (let i = 0; i < rf_list.length; i++) {
             if (rf_page_times === i) { break; }
@@ -285,6 +286,8 @@ var $this = {
             if (rf_async) {
                 rf_result = $this.OrderRefund(rf_item, rf_test);
             } else {
+                await new Promise((resolve, reject) => {
+                    setTimeout(resolve, rf_delay_time, "foo"); });
                 rf_result = await $this.OrderRefund(rf_item, rf_test);
             }
             console.log(`[ np-gpc ] refund.list | ${i + 1}. orders:`, rf_item, `, result:`, rf_result);
