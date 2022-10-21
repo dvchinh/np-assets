@@ -129,9 +129,10 @@ var $this = {
                         let currency = item['15']['1'];
                         let amount  = parseInt(item['15']['2'] || "0");
                             amount += (item['15']['3'] || 0) / 1000000000;
+                        let amountvnd = amount * (currency === "USD" ? 25000 : 1);
                         let pname = [ item['11']['1'], item['11']['2'] ];
                         let rfparam = [ item['22'], item['23']['1'] ];
-                        return { 'id': id, 'time': time, 'status': status, amount: amount, 'currency': currency, 'rf-param': rfparam, 'p-name': pname };
+                        return { 'id': id, 'time': time, 'status': status, 'amount': amount, 'currency': currency, 'rf-param': rfparam, 'p-name': pname, 'amount-vnd': amountvnd };
                     });
                     resolve(data);
                 }); } else {
@@ -158,8 +159,8 @@ var $this = {
         $this['orders'] = orders;
 
         let orders_rf = orders
-            .filter(item => ["da tinh phi", ""].includes(item['status']))
-            .sort((a, b) => (b['amount'] - a['amount']));
+            .filter(item => item['amount'] !== 0 && ["da tinh phi", "da hoan lai mot phan tien", ""].includes(item['status']))
+            .sort((a, b) => (b['amount-vnd'] - a['amount-vnd']));
         $this['orders-rf'] = orders_rf;
         console.log(`[ np-gpc ] orders.length: ${$this['orders'].length}, orders-rf:`, $this['orders-rf']);
     },
@@ -301,7 +302,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.1.7",
+    version: "0.1.8",
 };
 window['NPGPC'] = $this;
 })();
