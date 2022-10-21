@@ -204,7 +204,8 @@ var $this = {
                 orders[i] = order;
             }
             if (!order['rf-percent']) {
-                if (['VND'].includes(order['currency'])) {
+                if (['VND'].includes(order['currency']) &&
+                   !["da hoan lai mot phan tien"].includes[order['status']]) {
                     order['rf-percent'] = 99;
                 } else {
                     order['rf-percent'] = 100;
@@ -269,7 +270,7 @@ var $this = {
         let rf_async = paraml['rf-async'];
         let rf_page_size = paraml['rf-page-size'] || 10;
         let rf_page_times = paraml['rf-page-times'] || Number.MAX_SAFE_INTEGER;
-        let rf_delay_time = paraml['rf-delay-time'] || 0;
+        let rf_delay_time = paraml['rf-delay-time'] || 5000;
         let rf_list = [];
         $this['orders-rf'].forEach(order => {
             if (rf_list.length === 0 ||
