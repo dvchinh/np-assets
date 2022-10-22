@@ -290,9 +290,9 @@ var $this = {
             if (rf_async) {
                 rf_result = $this.OrderRefund(rf_item, rf_test);
             } else {
+                rf_result = await $this.OrderRefund(rf_item, rf_test);
                 await new Promise((resolve, reject) => {
                     setTimeout(resolve, rf_delay_time, "foo"); });
-                rf_result = await $this.OrderRefund(rf_item, rf_test);
             }
             console.log(`[ np-gpc ] refund.list | ${i + 1}. orders:`, rf_item, `, result:`, rf_result);
         }
