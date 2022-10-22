@@ -129,7 +129,9 @@ var $this = {
                         let currency = item['15']['1'];
                         let amount  = parseInt(item['15']['2'] || "0");
                             amount += (item['15']['3'] || 0) / 1000000000;
-                        let amountvnd = amount * (currency === "USD" ? 25000 : 1);
+                        let amountvnd = amount * (
+                            currency === "USD" ? 25000 :
+                            currency === "MYR" ?  6000 : 1);
                         let pname = [ item['11']['1'], item['11']['2'] ];
                         let rfparam = [ item['22'], item['23']['1'] ];
                         return { 'id': id, 'time': time, 'status': status, 'amount': amount, 'currency': currency, 'rf-param': rfparam, 'p-name': pname, 'amount-vnd': amountvnd };
@@ -204,8 +206,8 @@ var $this = {
                 orders[i] = order;
             }
             if (!order['rf-percent']) {
-                if (['VND'].includes(order['currency']) &&
-                   !["da hoan lai mot phan tien"].includes[order['status']]) {
+                if (!['USD'].includes(order['currency']) &&
+                    !["da hoan lai mot phan tien"].includes[order['status']]) {
                     order['rf-percent'] = 99;
                 } else {
                     order['rf-percent'] = 100;
@@ -303,7 +305,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.1.9",
+    version: "0.2.0",
 };
 window['NPGPC'] = $this;
 })();
