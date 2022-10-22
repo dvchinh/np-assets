@@ -207,7 +207,7 @@ var $this = {
             }
             if (!order['rf-percent']) {
                 if (!['USD'].includes(order['currency']) &&
-                    !["da hoan lai mot phan tien"].includes[order['status']]) {
+                    !["da hoan lai mot phan tien"].includes(order['status'])) {
                     order['rf-percent'] = 99;
                 } else {
                     order['rf-percent'] = 100;
