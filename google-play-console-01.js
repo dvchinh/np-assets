@@ -182,7 +182,7 @@ var $this = {
             let percent = order['rf-percent'];
             if (percent !== 100) {
                 let amount = order['amount'] * percent / 100;
-                let amount_odd = amount % 1 * 1000000000
+                let amount_odd = parseInt(amount % 1 * 1000000000);
                 ovalue['3'] = {
                     '1': order['currency'],
                     '2': parseInt(amount).toString()
@@ -305,7 +305,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.2.0",
+    version: "0.2.1",
 };
 window['NPGPC'] = $this;
 })();
