@@ -252,7 +252,7 @@ var $this = {
             }).then(res => {
                 if (res.ok) { res.json().then(dataf => {
                     // -: console.log(`[ google-play-console ] data:`, dataf);
-                    if (dataf['2'] === 1) {
+                    if (dataf['1'] || dataf['3']) {
                         reject(dataf);
                     } else {
                         resolve(dataf);
