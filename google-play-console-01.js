@@ -208,7 +208,7 @@ var $this = {
             if (!order['rf-percent']) {
                 if (!['USD'].includes(order['currency']) &&
                     !["da hoan lai mot phan tien"].includes(order['status'])) {
-                    order['rf-percent'] = 99;
+                    order['rf-percent'] = 99.99;
                 } else {
                     order['rf-percent'] = 100;
                 }
@@ -219,6 +219,7 @@ var $this = {
             // '1': "nguoi mua hoi tiec", '2': "chua nhan duoc mat hang", '3': "san pham bi loi", '4': "mua hang ngau nhien", '5': "don dat hang gian lan", '6': "gian lan khong co y", '7': "khac"
             console.log(`[ np-gpc ] refund.item | ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, rf-percent: ${order['rf-percent']}%, rf-reason: ${order['rf-reason']}`);
 
+            body['7'] = "have you bought it randomly?";
             body['8'].push(famount(order));
             if (!i) {
                 body['6'] = order['rf-reason'];
@@ -305,7 +306,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.2.3",
+    version: "0.2.5",
 };
 window['NPGPC'] = $this;
 })();
