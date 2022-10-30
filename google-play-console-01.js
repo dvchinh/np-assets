@@ -252,7 +252,9 @@ var $this = {
             "credentials": "include"
             }).then(res => {
                 if (res.ok) { res.json().then(dataf => {
-                    // -: console.log(`[ google-play-console ] data:`, dataf);
+                    if (dataf['1'] instanceof Array && dataf['2'] == 1) {
+                        console.error(`[ np-gpc ] The number of refunds is exceeded. Please retry after 24 hours.`);
+                    }
                     if (dataf['1'] || dataf['3']) {
                         reject(dataf);
                     } else {
@@ -306,7 +308,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.2.5",
+    version: "0.2.6",
 };
 window['NPGPC'] = $this;
 })();
