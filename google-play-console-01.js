@@ -133,8 +133,15 @@ var $this = {
                             currency === "USD" ? 25000 :
                             currency === "MYR" ?  6000 : 1);
                         let pname = [ item['11']['1'], item['11']['2'] ];
+                        let addr_country = item['14']['2'], addr_state = item['14']['4'], addr_city = item['14']['3'], addr_zipcode = item['14']['5'];
+                        let payment_type =
+                            (addr_country && addr_state && addr_city && addr_zipcode) ? "mail" :
+                            (addr_country == "VN" && addr_zipcode) ? "momo" :
+                            (addr_country == "VN") ? "zalopay" : "";
                         let rfparam = [ item['22'], item['23']['1'] ];
-                        return { 'id': id, 'time': time, 'status': status, 'amount': amount, 'currency': currency, 'rf-param': rfparam, 'p-name': pname, 'amount-vnd': amountvnd };
+                        return {
+                            'id': id, 'time': time, 'status': status, 'amount': amount, 'currency': currency, 'payment-type': payment_type, 'rf-param': rfparam,
+                            'p-name': pname, 'addr-country': addr_country, 'addr-state': addr_state, 'addr-city': addr_city, 'addr-zipcode': addr_zipcode, 'amount-vnd': amountvnd };
                     });
                     resolve(data);
                 }); } else {
@@ -308,7 +315,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.2.6",
+    version: "0.2.7",
 };
 window['NPGPC'] = $this;
 })();
