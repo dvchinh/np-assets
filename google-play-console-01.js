@@ -116,7 +116,7 @@ var $this = {
                         'orders': [],
                         'page-next': dataf["2"],
                     };
-                    data['orders'] = dataf['1'].map(function (item) {
+                    data['orders'] = (dataf['1'] || []).map(function (item) {
                         let id = item['1'];
                         let time = item['9'];
                         let status = "";
@@ -315,7 +315,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.2.7",
+    version: "0.2.8",
 };
 window['NPGPC'] = $this;
 })();
