@@ -57,7 +57,6 @@ var $this = {
                     xhr.prototype.open = function() {
                         console.log(`[ xhr ] url:`, arguments[1]);
                         if (!$this['dev_id'] && !$this['dev_auth']) {
-                            console.log(`[ xhr ] arguments:`, arguments);
                             let url = arguments[1];
                             let reg = new RegExp("/developers/(\\d+)/[^\\?]+(\\?[\\s\\S]+)", "i"), exec = reg.exec(url);
                             if (exec) {
@@ -125,7 +124,6 @@ var $this = {
             "credentials": "include"
             }).then(res => {
                 if (res.ok) { res.json().then(dataf => {
-                    // -: console.log(`[ google-play-console ] data:`, dataf);
                     let data = {
                         'orders': [],
                         'page-next': dataf["2"],
@@ -134,11 +132,11 @@ var $this = {
                         let id = item['1'];
                         let time = item['9'];
                         let status = "";
-                        if (item['2'] && item['3'] === 4) { status = "da tinh phi"; }
-                        if (item['2'] && item['3'] === 5) { status = "dang xu ly giao dich hoan tien"; }
-                        if (item['2'] && item['3'] === 6) { status = "da hoan tien"; }
-                        if (item['2'] && item['3'] === 7) { status = "da hoan lai mot phan tien"; }
-                        if (item['2'] && item['3'] === 8) { status = "dang xu ly giao dich hoan tien mot phan"; }
+                        if (/*item['2'] && */item['3'] === 4) { status = "da tinh phi"; }
+                        if (/*item['2'] && */item['3'] === 5) { status = "dang xu ly giao dich hoan tien"; }
+                        if (/*item['2'] && */item['3'] === 6) { status = "da hoan tien"; }
+                        if (/*item['2'] && */item['3'] === 7) { status = "da hoan lai mot phan tien"; }
+                        if (/*item['2'] && */item['3'] === 8) { status = "dang xu ly giao dich hoan tien mot phan"; }
                         if (item['5'] === 1) { status = "tien tra bi tu choi"; }
                         let currency = item['15']['1'];
                         let amount  = parseInt(item['15']['2'] || "0");
@@ -153,7 +151,7 @@ var $this = {
                             (addr_country && addr_state && addr_city && addr_zipcode) ? "mail" :
                             (addr_country == "VN" && addr_zipcode) ? "momo" :
                             (addr_country == "VN") ? "zalopay" : "";
-                        let rfparam = [ item['22'], item['23']['1'] ];
+                        let rfparam = [ item['22'], item['23']['1'], item[2] ];
                         return {
                             'id': id, 'time': time, 'status': status, 'amount': amount, 'currency': currency, 'payment-type': payment_type, 'rf-param': rfparam,
                             'pk-name': pkname, 'p-name': pname, 'addr-country': addr_country, 'addr-state': addr_state, 'addr-city': addr_city, 'addr-zipcode': addr_zipcode, 'amount-vnd': amountvnd };
@@ -218,7 +216,7 @@ var $this = {
                 ovalue['5'] = order['rf-param'][0];
             }
             if (percent === 100) {
-                ovalue['2'] = false;
+                ovalue['2'] = !order['rf-param'][2];
             }
             return ovalue;
         };
@@ -327,126 +325,78 @@ var $this = {
     StartProcess: function() {
         console.log(`[ np-gpc ] version: ${NPGPC['version']}`);
         console.log(`[ np-gpc ] authorization is being grabbed.`);
-        /*
         $this.FetchAuth().then(() => {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth:`, $this['dev_auth']);
             let d = new Date(); d.setDate(d.getDate() + 1);
             $this['order-time-sta'] = new Date(2008, 0, 1, 0, 0, 0, 0);
             $this['order-time-end'] = $this.utils.MinTimeInDay(d);
-            // Nov 03: $this.OrderFill();
-        });*/
+            $this.OrderFill();
+        });
 
-        /* intercept of "fetch" request / response
-        const constantMock = window.fetch;
-        window.fetch = function() {
-            console.log(`[ fetch ] arguments:`, arguments);
-            return constantMock.apply(this, arguments);
-        };*/
-        /*(function(proxied) {
-            XMLHttpRequest = function() {
-                //cannot use apply directly since we want a 'new' version
-                var wrapped = new(Function.prototype.bind.apply(proxied, arguments));
-        
-                Object.defineProperty(wrapped, 'responseText', {
-                    writable: true
-                });
-        
-                return wrapped;
-            };
-        })(XMLHttpRequest);*/
-        // var order_ = {"1":[{"1":"GPA.3338-3347-9234-37959","2":"opibohddcojgnfcbhllmpkjc.AO-J1OxazuqCO_PPD3_rz_Gat6cWa-XPjMchPYP7PKB__Z8Fejy0TMbGPL4f89Z3TUQ6fwkXj5bZoubmcLCbTeXPNNHXVsC1VA","3":6,"4":2,"6":2,"7":[{"1":{"1":"1662007118","2":789000000},"2":2,"3":"Order received"},{"1":{"1":"1662007125","2":927000000},"2":3,"3":"The customer's form of payment was authorized for VND 230,000 and passed all risk checks"},{"1":{"1":"1662007246","2":539000000},"2":4,"3":"The customer's form of payment was successfully charged for VND 230,000"},{"1":{"1":"1662339585","2":688000000},"2":8,"3":"A partial refund of VND 229,977 was initiated. The new balance is VND 23. \u003e Reason: Product is defective/damaged."},{"1":{"1":"1662339885","2":921000000},"2":7,"3":"The user was partially refunded VND 229,977. The new balance is VND 23."},{"1":{"1":"1665976299","2":867000000},"2":5,"3":"A refund of VND 23 was initiated. Reason: Buyer's remorse."},{"1":{"1":"1665976300","2":821000000},"2":6,"3":"The user was refunded VND 23"}],"9":"1662007118789","10":{"1":"1665976600","2":353000000},"11":{"1":"donate (wheelgame)","2":"item3","3":"thank you","4":{"1":"VND","2":"230000"},"6":{"1":"VND"},"7":{"1":"VND"},"12":{"1":"USD"},"13":1,"14":2},"12":2,"13":"com.tienld.wheelgame","14":{"2":"VN"},"15":{"1":"VND"},"17":4,"19":{"1":"VND"},"20":{},"21":{"1":"VND"},"22":"CAYQAhihjsafvjA=","23":{"1":"4973458905011414952"},"24":[{"1":"donate (wheelgame)","2":"item3","3":"thank you","4":{"1":"VND","2":"230000"},"6":{"1":"VND"},"7":{"1":"VND"},"13":1,"14":2}],"25":{"1":"VND","2":"230000"},"26":{"1":"VND"},"27":{"1":"VND"},"28":{"1":"USD"}}]};
-        // var order_81791 = {"1":[{"1":"GPA.3309-0347-3638-81791","3":4,"6":2,"7":[{"1":{"1":"1663818238","2":766000000},"2":2,"3":"Order received"},{"1":{"1":"1663818241","2":809000000},"2":3,"3":"The customer's form of payment was authorized for VND 5,000,000 and passed all risk checks"},{"1":{"1":"1663818362","2":552000000},"2":4,"3":"The customer's form of payment was successfully charged for VND 5,000,000"}],"9":"1663818238766","10":{"1":"1663818362","2":592000000},"11":{"1":"Keep Climbing","2":"com.SalaGame.KeepClimbing","3":"- Keep Climbing is a simple game for killing time.","4":{"1":"VND","2":"5000000"},"6":{"1":"VND"},"7":{"1":"VND","2":"4250000"},"12":{"1":"USD","2":"179","3":250000000},"13":1,"14":1},"12":1,"13":"com.SalaGame.KeepClimbing","14":{"2":"VN","3":"Hải Phòng","4":"HẢI PHÒNG","5":"180000"},"15":{"1":"VND","2":"5000000"},"17":1,"19":{"1":"VND","2":"5000000"},"20":{},"21":{"1":"VND","2":"5000000"},"22":"CAQQAhjg3bWatjA=","23":{"1":"4974509822358009088"},"24":[{"1":"Keep Climbing","2":"com.SalaGame.KeepClimbing","3":"- Keep Climbing is a simple game for killing time.","4":{"1":"VND","2":"5000000"},"6":{"1":"VND"},"7":{"1":"VND","2":"4250000"},"13":1,"14":1}],"25":{"1":"VND","2":"5000000"},"26":{"1":"VND"},"27":{"1":"VND","2":"4250000"},"28":{"1":"USD","2":"179","3":250000000}}]};
-        var order_ = {"1":[{"1":"GPA.3338-3347-9234-37959","2":"opibohddcojgnfcbhllmpkjc.AO-J1OxazuqCO_PPD3_rz_Gat6cWa-XPjMchPYP7PKB__Z8Fejy0TMbGPL4f89Z3TUQ6fwkXj5bZoubmcLCbTeXPNNHXVsC1VA","3":6,"4":2,"6":2,"7":[{"1":{"1":"1662007118","2":789000000},"2":2,"3":"Order received"},{"1":{"1":"1662007125","2":927000000},"2":3,"3":"The customer's form of payment was authorized for VND 230,000 and passed all risk checks"},{"1":{"1":"1662007246","2":539000000},"2":4,"3":"The customer's form of payment was successfully charged for VND 230,000"},{"1":{"1":"1662339585","2":688000000},"2":8,"3":"A partial refund of VND 229,977 was initiated. The new balance is VND 23. > Reason: Product is defective/damaged."},{"1":{"1":"1662339885","2":921000000},"2":7,"3":"The user was partially refunded VND 229,977. The new balance is VND 23."},{"1":{"1":"1665976299","2":867000000},"2":5,"3":"A refund of VND 23 was initiated. Reason: Buyer's remorse."},{"1":{"1":"1665976300","2":821000000},"2":6,"3":"The user was refunded VND 23"}],"9":"1662007118789","10":{"1":"1665976600","2":353000000},"11":{"1":"donate (wheelgame)","2":"item3","3":"thank you","4":{"1":"VND","2":"230000"},"6":{"1":"VND"},"7":{"1":"VND"},"12":{"1":"USD"},"13":1,"14":2},"12":2,"13":"com.tienld.wheelgame","14":{"2":"US"},"15":{"1":"VND"},"17":4,"19":{"1":"VND"},"20":{},"21":{"1":"VND"},"22":"CAYQAhihjsafvjA=","23":{"1":"4973458905011414952"},"24":[{"1":"donate (wheelgame)","2":"item3","3":"thank you","4":{"1":"VND","2":"230000"},"6":{"1":"VND"},"7":{"1":"VND"},"13":1,"14":2}],"25":{"1":"VND","2":"230000"},"26":{"1":"VND"},"27":{"1":"VND"},"28":{"1":"USD"}}]};
-        var order_81791 = {"1":[{"1":"GPA.3338-3347-9234-37959","3":5,"4":2,"6":3,"7":[{"1":{"1":"1663818238","2":766000000},"2":2,"3":"Order received"},{"1":{"1":"1663818241","2":809000000},"2":3,"3":"The customer's form of payment was authorized for VND 5,000,000 and passed all risk checks"},{"1":{"1":"1663818362","2":552000000},"2":4,"3":"The customer's form of payment was successfully charged for VND 5,000,000"},{"1":{"1":"1667498000","2":24000000},"2":5,"3":"A refund of VND 5,000,000 was initiated. \u003e Reason: Product is defective/damaged."}],"9":"1663818238766","10":{"1":"1667498000","2":662000000},"11":{"1":"Keep Climbing","2":"com.SalaGame.KeepClimbing","3":"- Keep Climbing is a simple game for killing time.","4":{"1":"VND","2":"5000000"},"6":{"1":"VND"},"7":{"1":"VND"},"12":{"1":"USD"},"13":1,"14":1},"12":1,"13":"com.SalaGame.KeepClimbing","14":{"2":"VN","3":"Hải Phòng","4":"HẢI PHÒNG","5":"180000"},"15":{"1":"VND"},"17":4,"19":{"1":"VND"},"20":{},"21":{"1":"VND"},"22":"CAUQAxiWgoH1wzA=","23":{"1":"4974509822358009088"},"24":[{"1":"Keep Climbing","2":"com.SalaGame.KeepClimbing","3":"- Keep Climbing is a simple game for killing time.","4":{"1":"VND","2":"5000000"},"6":{"1":"VND"},"7":{"1":"VND"},"13":1,"14":1}],"25":{"1":"VND","2":"5000000"},"26":{"1":"VND"},"27":{"1":"VND"},"28":{"1":"USD"}}]};
-        (function (open) {
-            XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
-                var self = this;
-                this.addEventListener('readystatechange', function() {
-                    // response: [ "this.responseText", "this.response", "self.response" ]
-                    if (this.readyState == 4 &&
-                        this.responseText.length) {
-                        console.log(`[ xhr.intercept ] url: ${this.responseURL}`);
-                        if (this.responseURL.indexOf('/orders:fetch?') != -1) {
-                            Object.defineProperty(self, 'response', {
-                                get: function() { return this.bValue; },
-                                set: function (newValue) { this.bValue = newValue; },
-                                enumerable: true,
-                                configurable: true
-                            });
-                            Object.defineProperty(self, 'responseText', {
-                                get: function() { return this.cValue; },
-                                set: function (newValue) { this.cValue = newValue; },
-                                enumerable: true,
-                                configurable: true
-                            });
-                            self.response = JSON.stringify(order_81791, null, "");
-                            self.responseText = JSON.stringify(order_81791, null, "");
-                            // self.response = JSON.stringify(order_, null, "");
-                            // self.responseText = JSON.stringify(order_, null, "");
-                            console.log(`[ xhr.intercept ] response: ${this.response}`);
-                        }
-                        if (this.responseURL.indexOf('/orders:fetchUserLatestOrders?') != -1) {
-                            var response_org = JSON.parse(this.response);
-                            response_org['1'][0] = order_81791;
-                            Object.defineProperty(self, 'response', {
-                                get: function() { return this.bValue; },
-                                set: function (newValue) { this.bValue = newValue; },
-                                enumerable: true,
-                                configurable: true
-                            });
-                            Object.defineProperty(self, 'responseText', {
-                                get: function() { return this.cValue; },
-                                set: function (newValue) { this.cValue = newValue; },
-                                enumerable: true,
-                                configurable: true
-                            });
-                            self.response = JSON.stringify(response_org, null, "");
-                            self.responseText = JSON.stringify(response_org, null, "");
-                            // self.response = JSON.stringify(order_, null, "");
-                            // self.responseText = JSON.stringify(order_, null, "");
-                            console.log(`[ xhr.intercept ] response: ${this.response}`);
-                        }
-                    }
-                }, false);
-                open.apply(this, arguments);
-            };
-        })(XMLHttpRequest.prototype.open);
-        /*
-        var rawOpen = XMLHttpRequest.prototype.open;
+        if (sessionStorage.getItem("np-gpc-intercept") === "Y") {
+            /* intercept of "fetch" request / response
+            const constantMock = window.fetch;
+            window.fetch = function() {
+                console.log(`[ intercept.fetch ] arguments:`, arguments);
+                return constantMock.apply(this, arguments);
+            };*/
 
-        XMLHttpRequest.prototype.open = function() {
-            if (!this._hooked) {
-                this._hooked = true;
-                setupHook(this);
-            }
-            rawOpen.apply(this, arguments);
+            /* intercept of "XMLHttpRequest" request / response */
+            // url: https://play.google.com/console/u/0/developers/7249020629240798679/orders/GPA.3338-3347-9234-37959
+            let rorder = {"1":[{"1":"GPA.3309-0347-3638-81791","3":6,"4":2,"6":3,"7":[{"1":{"1":"1663818238","2":766000000},"2":2,"3":"Order received"},{"1":{"1":"1663818241","2":809000000},"2":3,"3":"The customer's form of payment was authorized for VND 5,000,000 and passed all risk checks"},{"1":{"1":"1663818362","2":552000000},"2":4,"3":"The customer's form of payment was successfully charged for VND 5,000,000"},{"1":{"1":"1667498000","2":24000000},"2":5,"3":"A refund of VND 5,000,000 was initiated. \u003e Reason: Product is defective/damaged."},{"1":{"1":"1667498480","2":689000000},"2":6,"3":"The user was refunded VND 5,000,000"}],"9":"1663818238766","10":{"1":"1667498480","2":689000000},"11":{"1":"Keep Climbing","2":"com.SalaGame.KeepClimbing","3":"- Keep Climbing is a simple game for killing time.","4":{"1":"VND","2":"5000000"},"6":{"1":"VND"},"7":{"1":"VND"},"12":{"1":"USD"},"13":1,"14":1},"12":1,"13":"com.SalaGame.KeepClimbing","14":{"2":"VN","3":"Hải Phòng","4":"HẢI PHÒNG","5":"180000"},"15":{"1":"VND"},"17":4,"19":{"1":"VND"},"20":{},"21":{"1":"VND"},"22":"CAYQAxixqJ71wzA=","23":{"1":"4974509822358009088"},"24":[{"1":"Keep Climbing","2":"com.SalaGame.KeepClimbing","3":"- Keep Climbing is a simple game for killing time.","4":{"1":"VND","2":"5000000"},"6":{"1":"VND"},"7":{"1":"VND"},"13":1,"14":1}],"25":{"1":"VND","2":"5000000"},"26":{"1":"VND"},"27":{"1":"VND"},"28":{"1":"USD"}}]};
+                rorder['1'][0]['1'] = "GPA.3338-3347-9234-37959";
+            (function (open) {
+                XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
+                    var self = this;
+                    this.addEventListener('readystatechange', function() {
+                        // response: [ "this.responseText", "this.response", "self.response" ]
+                        if (this.readyState == 4 &&
+                            this.responseText.length) {
+                            console.log(`[ intercept.xhr ] url: ${this.responseURL}`);
+                            if (this.responseURL.indexOf('/orders:fetch?') != -1) {
+                                Object.defineProperty(self, 'response', {
+                                    get: function() { return this.bValue; },
+                                    set: function (newValue) { this.bValue = newValue; },
+                                    enumerable: true,
+                                    configurable: true
+                                });
+                                Object.defineProperty(self, 'responseText', {
+                                    get: function() { return this.cValue; },
+                                    set: function (newValue) { this.cValue = newValue; },
+                                    enumerable: true,
+                                    configurable: true
+                                });
+                                self.response = JSON.stringify(rorder, null, "");
+                                self.responseText = JSON.stringify(rorder, null, "");
+                                console.log(`[ xhr.intercept ] response: ${this.response}`);
+                            }
+                            if (this.responseURL.indexOf('/orders:fetchUserLatestOrders?') != -1) {
+                                let response = JSON.parse(this.response);
+                                    response['1'][0] = rorder['1'][0];
+                                Object.defineProperty(self, 'response', {
+                                    get: function() { return this.bValue; },
+                                    set: function (newValue) { this.bValue = newValue; },
+                                    enumerable: true,
+                                    configurable: true
+                                });
+                                Object.defineProperty(self, 'responseText', {
+                                    get: function() { return this.cValue; },
+                                    set: function (newValue) { this.cValue = newValue; },
+                                    enumerable: true,
+                                    configurable: true
+                                });
+                                self.response = JSON.stringify(response, null, "");
+                                self.responseText = JSON.stringify(response, null, "");
+                                console.log(`[ intercept.xhr ] response: ${this.response}`);
+                            }
+                        }
+                    }, false);
+                    open.apply(this, arguments);
+                };
+            })(XMLHttpRequest.prototype.open);
         }
-        
-        function setupHook(xhr) {
-            function getter() {
-                console.log('get responseText:');
-        
-                delete xhr.responseText;
-                var ret = xhr.responseText;
-                setup();
-                return ret;
-            }
-        
-            function setter(str) {
-                console.log('set responseText: %s', str);
-            }
-        
-            function setup() {
-                Object.defineProperty(xhr, 'responseText', {
-                    get: getter,
-                    set: setter,
-                    configurable: true
-                });
-            }
-            setup();
-        }*/
     },
-    version: "0.3.5",
+    version: "0.3.6",
 };
 window['NPGPC'] = $this;
 })();
