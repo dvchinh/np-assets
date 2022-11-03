@@ -364,13 +364,13 @@ var $this = {
                         this.responseText.length) {
                         console.log(`[ xhr.intercept ] url: ${this.responseURL}`);
                         if (this.responseURL.indexOf('/orders:fetch?') != -1) {
-                            Object.defineProperty(self, 'response', {
+                            /* Object.defineProperty(self, 'response', {
                                 get: function() { return this.bValue; },
                                 set: function (newValue) { this.bValue = newValue; },
                                 enumerable: true,
                                 configurable: true
-                            });
-                            // -: self.response = JSON.stringify(order_81791, null, "");
+                            });*/
+                            self.response = JSON.stringify(order_81791, null, "");
                             console.log(`[ xhr.intercept ] response: ${this.response}`);
                         }
                     }
