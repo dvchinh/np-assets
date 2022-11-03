@@ -327,13 +327,14 @@ var $this = {
     StartProcess: function() {
         console.log(`[ np-gpc ] version: ${NPGPC['version']}`);
         console.log(`[ np-gpc ] authorization is being grabbed.`);
+        /*
         $this.FetchAuth().then(() => {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth:`, $this['dev_auth']);
             let d = new Date(); d.setDate(d.getDate() + 1);
             $this['order-time-sta'] = new Date(2008, 0, 1, 0, 0, 0, 0);
             $this['order-time-end'] = $this.utils.MinTimeInDay(d);
             // Nov 03: $this.OrderFill();
-        });
+        });*/
 
         /* intercept of "fetch" request / response
         const constantMock = window.fetch;
