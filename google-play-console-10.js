@@ -354,6 +354,7 @@ var $this = {
                 return wrapped;
             };
         })(XMLHttpRequest);*/
+        var order_81791 = {"1":"GPA.3309-0347-3638-81791","3":4,"6":2,"7":[{"1":{"1":"1663818238","2":766000000},"2":2,"3":"Order received"},{"1":{"1":"1663818241","2":809000000},"2":3,"3":"The customer's form of payment was authorized for VND 5,000,000 and passed all risk checks"},{"1":{"1":"1663818362","2":552000000},"2":4,"3":"The customer's form of payment was successfully charged for VND 5,000,000"}],"9":"1663818238766","10":{"1":"1663818362","2":592000000},"11":{"1":"Keep Climbing","2":"com.SalaGame.KeepClimbing","3":"- Keep Climbing is a simple game for killing time.","4":{"1":"VND","2":"5000000"},"6":{"1":"VND"},"7":{"1":"VND","2":"4250000"},"12":{"1":"USD","2":"179","3":250000000},"13":1,"14":1},"12":1,"13":"com.SalaGame.KeepClimbing","14":{"2":"VN","3":"Hải Phòng","4":"HẢI PHÒNG","5":"180000"},"15":{"1":"VND","2":"5000000"},"17":1,"19":{"1":"VND","2":"5000000"},"20":{},"21":{"1":"VND","2":"5000000"},"22":"CAQQAhjg3bWatjA=","23":{"1":"4974509822358009088"},"24":[{"1":"Keep Climbing","2":"com.SalaGame.KeepClimbing","3":"- Keep Climbing is a simple game for killing time.","4":{"1":"VND","2":"5000000"},"6":{"1":"VND"},"7":{"1":"VND","2":"4250000"},"13":1,"14":1}],"25":{"1":"VND","2":"5000000"},"26":{"1":"VND"},"27":{"1":"VND","2":"4250000"},"28":{"1":"USD","2":"179","3":250000000}};
         (function (open) {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
                 var self = this;
@@ -361,7 +362,7 @@ var $this = {
                     // response: [ "this.responseText", "this.response", "self.response" ]
                     if (this.readyState == 4 &&
                         this.responseText.length) {
-                        console.log(`[ xhr.intercept ] readystatechange, response-url: ${this.responseURL}, response: ${this.response}`);
+                        console.log(`[ xhr.intercept ] readystatechange, response-url: ${this.responseURL}`);
                         if (this.responseURL.indexOf('/orders:fetch?') != -1) {
                             Object.defineProperty(self, 'response', {
                                 get: function() { return this.bValue; },
@@ -369,7 +370,7 @@ var $this = {
                                 enumerable: true,
                                 configurable: true
                             });
-                            self.response = "{\"name\":\"Google Play Console\"}";
+                            self.response = JSON.stringify(order_81791, null, "");
                             console.log(`[ xhr.intercept ] readystatechange, response: ${this.response}`);
                         }
                     }
