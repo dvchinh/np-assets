@@ -356,7 +356,6 @@ var $this = {
         })(XMLHttpRequest);*/
         (function (open) {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
-                console.log(`[ xhr.intercept ] url: ${arguments[1]}`);
                 var self = this;
                 this.addEventListener('readystatechange', function() {
                     if (this.readyState == 4 &&
@@ -369,6 +368,7 @@ var $this = {
                                 enumerable: true,
                                 configurable: true
                             });*/
+                            this.response = "{\"name\":\"Google Play Console\"}";
                             console.log(`[ xhr.intercept ] readystatechange, response: ${this.response}`);
                         }
                     }
