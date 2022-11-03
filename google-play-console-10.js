@@ -185,6 +185,7 @@ var $this = {
             .filter(item => item['amount'] !== 0 && ["da tinh phi", "da hoan lai mot phan tien", ""].includes(item['status']))
             .sort((a, b) => (b['amount-vnd'] - a['amount-vnd']));
         $this['orders-rf'] = orders_rf;
+
         let total_amount_rf = orders_rf.reduce((prev, order) => prev + order['amount-vnd'], 0);
         console.log(`[ np-gpc ] orders.length: ${$this['orders'].length}, rf-amount: ${total_amount_rf} VND, rf-orders:`, $this['orders-rf']);
     },
