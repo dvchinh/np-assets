@@ -335,13 +335,33 @@ var $this = {
             // Nov 03: $this.OrderFill();
         });
 
+        /* intercept of "fetch" request / response
         const constantMock = window.fetch;
         window.fetch = function() {
             console.log(`[ fetch ] arguments:`, arguments);
             return constantMock.apply(this, arguments);
-        };
+        };*/
+        (function (open) {
+            XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
+                var self = this;
+                this.addEventListener('readystatechange', function() {
+                    if (this.responseText.length > 0 &&
+                        this.readyState == 4 &&
+                        this.responseURL.indexOf('/orders:')) {
+                        Object.defineProperty(self, 'response', {
+                            get: function() { return bValue; },
+                            set: function (newValue) { bValue = newValue; },
+                            enumerable: true,
+                            configurable: true
+                        });
+                        console.log(`[ xhr ] readystatechange, response:`, self.response);
+                    }
+                });
+                open.apply(this, arguments);
+            };
+        })(XMLHttpRequest.prototype.open);
     },
-    version: "0.3.3",
+    version: "0.3.4",
 };
 window['NPGPC'] = $this;
 })();
