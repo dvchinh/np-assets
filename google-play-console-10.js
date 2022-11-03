@@ -358,17 +358,18 @@ var $this = {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
                 var self = this;
                 this.addEventListener('readystatechange', function() {
+                    // response: [ "this.responseText", "this.response", "self.response" ]
                     if (this.readyState == 4 &&
                         this.responseText.length) {
-                        console.log(`[ xhr.intercept ] readystatechange, response-url: ${this.responseURL}, response-text: ${this.responseText.length}, response (this): ${this.response.length}, response (self): ${self.response.length}`);
+                        console.log(`[ xhr.intercept ] readystatechange, response-url: ${this.responseURL}, response: ${this.response}`);
                         if (this.responseURL.indexOf('/orders:fetch?') != -1) {
-                            /*Object.defineProperty(self, 'response', {
+                            Object.defineProperty(self, 'response', {
                                 get: function() { return this.bValue; },
                                 set: function (newValue) { this.bValue = newValue; },
                                 enumerable: true,
                                 configurable: true
-                            });*/
-                            this.response = "{\"name\":\"Google Play Console\"}";
+                            });
+                            self.response = "{\"name\":\"Google Play Console\"}";
                             console.log(`[ xhr.intercept ] readystatechange, response: ${this.response}`);
                         }
                     }
