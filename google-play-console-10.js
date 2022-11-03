@@ -332,10 +332,10 @@ var $this = {
             let d = new Date(); d.setDate(d.getDate() + 1);
             $this['order-time-sta'] = new Date(2008, 0, 1, 0, 0, 0, 0);
             $this['order-time-end'] = $this.utils.MinTimeInDay(d);
-            $this.OrderFill();
+            // $this.OrderFill();
         });
     },
-    version: "0.3.1",
+    version: "0.3.2",
 };
 window['NPGPC'] = $this;
 })();
