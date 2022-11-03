@@ -374,7 +374,7 @@ var $this = {
         
         function setupHook(xhr) {
             function getter() {
-                console.log('get responseText:', xhr.responseText);
+                console.log('get responseText:');
         
                 delete xhr.responseText;
                 var ret = xhr.responseText;
