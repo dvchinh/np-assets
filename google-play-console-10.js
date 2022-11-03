@@ -362,7 +362,7 @@ var $this = {
                     // response: [ "this.responseText", "this.response", "self.response" ]
                     if (this.readyState == 4 &&
                         this.responseText.length) {
-                        console.log(`[ xhr.intercept ] readystatechange, response-url: ${this.responseURL}`);
+                        console.log(`[ xhr.intercept ] url: ${this.responseURL}`);
                         if (this.responseURL.indexOf('/orders:fetch?') != -1) {
                             Object.defineProperty(self, 'response', {
                                 get: function() { return this.bValue; },
@@ -370,8 +370,8 @@ var $this = {
                                 enumerable: true,
                                 configurable: true
                             });
-                            self.response = JSON.stringify(order_81791, null, "");
-                            console.log(`[ xhr.intercept ] readystatechange, response: ${this.response}`);
+                            // -: self.response = JSON.stringify(order_81791, null, "");
+                            console.log(`[ xhr.intercept ] response: ${this.response}`);
                         }
                     }
                 }, false);
