@@ -379,6 +379,8 @@ var $this = {
                             });
                             // self.response = JSON.stringify(order_81791, null, "");
                             // self.responseText = JSON.stringify(order_81791, null, "");
+                            self.response = JSON.stringify(order_, null, "");
+                            self.responseText = JSON.stringify(order_, null, "");
                             console.log(`[ xhr.intercept ] response: ${this.response}`);
                         }
                     }
