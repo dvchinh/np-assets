@@ -371,8 +371,8 @@ var $this = {
                                 configurable: true
                             });
                             Object.defineProperty(self, 'responseText', {
-                                get: function() { return this.bValue; },
-                                set: function (newValue) { this.bValue = newValue; },
+                                get: function() { return this.cValue; },
+                                set: function (newValue) { this.cValue = newValue; },
                                 enumerable: true,
                                 configurable: true
                             });
