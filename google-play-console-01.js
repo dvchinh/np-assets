@@ -216,7 +216,7 @@ var $this = {
             if (!order['rf-percent']) {
                 if (!['USD'].includes(order['currency']) &&
                     !["da hoan lai mot phan tien"].includes(order['status'])) {
-                    order['rf-percent'] = 99.99;
+                    order['rf-percent'] = 100;
                 } else {
                     order['rf-percent'] = 100;
                 }
@@ -316,7 +316,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.2.9",
+    version: "0.3.0",
 };
 window['NPGPC'] = $this;
 })();
