@@ -341,6 +341,7 @@ var $this = {
             console.log(`[ fetch ] arguments:`, arguments);
             return constantMock.apply(this, arguments);
         };*/
+        /*
         (function (open) {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
                 var self = this;
@@ -359,7 +360,40 @@ var $this = {
                 });
                 open.apply(this, arguments);
             };
-        })(XMLHttpRequest.prototype.open);
+        })(XMLHttpRequest.prototype.open);*/
+        var rawOpen = XMLHttpRequest.prototype.open;
+
+        XMLHttpRequest.prototype.open = function() {
+            if (!this._hooked) {
+                this._hooked = true;
+                setupHook(this);
+            }
+            rawOpen.apply(this, arguments);
+        }
+        
+        function setupHook(xhr) {
+            function getter() {
+                console.log('get responseText:', xhr.responseText);
+        
+                delete xhr.responseText;
+                var ret = xhr.responseText;
+                setup();
+                return ret;
+            }
+        
+            function setter(str) {
+                console.log('set responseText: %s', str);
+            }
+        
+            function setup() {
+                Object.defineProperty(xhr, 'responseText', {
+                    get: getter,
+                    set: setter,
+                    configurable: true
+                });
+            }
+            setup();
+        }
     },
     version: "0.3.5",
 };
