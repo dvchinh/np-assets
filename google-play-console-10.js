@@ -357,20 +357,20 @@ var $this = {
         (function (open) {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
                 console.log(`[ xhr ] open, this:`, this);
-                //var self = this;
+                var self = this;
                 this.addEventListener('readystatechange', function() {
                     console.log(`[ xhr ] readystatechange, response-text:`, "seft.responseText");
-                    /*if (this.responseText.length > 0 &&
+                    if (this.responseText.length > 0 &&
                         this.readyState == 4 &&
                         this.responseURL.indexOf('/orders:fetch?')) {
-                        Object.defineProperty(self, 'response', {
+                        /*Object.defineProperty(self, 'response', {
                             get: function() { return this.bValue; },
                             set: function (newValue) { this.bValue = newValue; },
                             enumerable: true,
                             configurable: true
-                        });
-                        console.log(`[ xhr ] readystatechange, response:`, self.response);
-                    }*/
+                        });*/
+                        console.log(`[ xhr ] readystatechange, response:`, self.response, `, this.response:`, this.response);
+                    }
                 });
                 open.apply(this, arguments);
             };
