@@ -385,6 +385,27 @@ var $this = {
                             // self.responseText = JSON.stringify(order_, null, "");
                             console.log(`[ xhr.intercept ] response: ${this.response}`);
                         }
+                        if (this.responseURL.indexOf('/orders:fetchUserLatestOrders?') != -1) {
+                            var response_org = JSON.parse(this.response);
+                            response_org['1'][0] = order_81791;
+                            Object.defineProperty(self, 'response', {
+                                get: function() { return this.bValue; },
+                                set: function (newValue) { this.bValue = newValue; },
+                                enumerable: true,
+                                configurable: true
+                            });
+                            Object.defineProperty(self, 'responseText', {
+                                get: function() { return this.cValue; },
+                                set: function (newValue) { this.cValue = newValue; },
+                                enumerable: true,
+                                configurable: true
+                            });
+                            self.response = JSON.stringify(response_org, null, "");
+                            self.responseText = JSON.stringify(response_org, null, "");
+                            // self.response = JSON.stringify(order_, null, "");
+                            // self.responseText = JSON.stringify(order_, null, "");
+                            console.log(`[ xhr.intercept ] response: ${this.response}`);
+                        }
                     }
                 }, false);
                 open.apply(this, arguments);
