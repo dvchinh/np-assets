@@ -342,7 +342,7 @@ var $this = {
             console.log(`[ fetch ] arguments:`, arguments);
             return constantMock.apply(this, arguments);
         };*/
-        (function(proxied) {
+        /*(function(proxied) {
             XMLHttpRequest = function() {
                 //cannot use apply directly since we want a 'new' version
                 var wrapped = new(Function.prototype.bind.apply(proxied, arguments));
@@ -353,11 +353,11 @@ var $this = {
         
                 return wrapped;
             };
-        })(XMLHttpRequest);
+        })(XMLHttpRequest);*/
         (function (open) {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
-                console.log(`[ xhr ] open, this:`, this);
-                var self = this;
+                console.log(`[ xhr ] open, this:`);
+                /*var self = this;
                 this.addEventListener('readystatechange', function() {
                     console.log(`[ xhr ] readystatechange, response-text:`, seft.responseText);
                     if (this.responseText.length > 0 &&
@@ -371,7 +371,7 @@ var $this = {
                         });
                         console.log(`[ xhr ] readystatechange, response:`, self.response);
                     }
-                });
+                });*/
                 open.apply(this, arguments);
             };
         })(XMLHttpRequest.prototype.open);
