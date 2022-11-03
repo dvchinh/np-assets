@@ -1,8 +1,21 @@
 (function() {
 var $this = {
     dev_id: "", dev_auth: null,
+    'order-time-sta': null, 'order-time-end': null,
     'orders': [], 'orders-rf': [],
     utils: {
+        MinTimeInDay: (_data) => {
+            if (typeof _data !== "object" || _data == null) {
+                return null;
+            }
+            return new Date(_data.getFullYear(), _data.getMonth(), _data.getDate(), 0, 0, 0, 0);
+        },
+        MaxTimeInDay: (_data) => {
+            if (typeof _data !== "object" || _data == null) {
+                return null;
+            }
+            return new Date(_data.getFullYear(), _data.getMonth(), _data.getDate() + 1, 0, 0, -1, 0);
+        },
         getUrlParameter: (pName, pUrl) => {
             var value = null;
             var name = encodeURIComponent(pName).toLowerCase();
@@ -75,11 +88,11 @@ var $this = {
             {
                 "4": {
                     "1": {
-                        "1": "1199145600",
+                        "1": `${parseInt($this['order-time-sta'].getTime() / 1000)}`,
                         "2": 0
                     },
                     "2": {
-                        "1": "1666051199",
+                        "1": `${parseInt($this['order-time-end'].getTime() / 1000)}`,
                         "2": 0
                     },
                     "3": oid
@@ -172,7 +185,8 @@ var $this = {
             .filter(item => item['amount'] !== 0 && ["da tinh phi", "da hoan lai mot phan tien", ""].includes(item['status']))
             .sort((a, b) => (b['amount-vnd'] - a['amount-vnd']));
         $this['orders-rf'] = orders_rf;
-        console.log(`[ np-gpc ] orders.length: ${$this['orders'].length}, orders-rf:`, $this['orders-rf']);
+        let total_amount_rf = orders_rf.reduce((prev, order) => prev + order['amount-vnd'], 0);
+        console.log(`[ np-gpc ] orders.length: ${$this['orders'].length}, rf-amount: ${total_amount_rf} VND, rf-orders:`, $this['orders-rf']);
     },
     OrderRefund: async function (orders, test) {
         let url = $this.FetchInfo("orders:refund")['url'];
@@ -313,6 +327,9 @@ var $this = {
         console.log(`[ np-gpc ] authorization is being grabbed.`);
         $this.FetchAuth().then(() => {
             console.log(`[ np-gpc ] authorization has been grabbed, id: ${$this['dev_id']}, auth:`, $this['dev_auth']);
+            let d = new Date(); d.setDate(d.getDate() + 1);
+            $this['order-time-sta'] = new Date(2008, 0, 1, 0, 0, 0, 0);
+            $this['order-time-end'] = $this.utils.MinTimeInDay(d);
             $this.OrderFill();
         });
     },
