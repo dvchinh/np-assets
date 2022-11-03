@@ -349,8 +349,8 @@ var $this = {
                         this.readyState == 4 &&
                         this.responseURL.indexOf('/orders:')) {
                         Object.defineProperty(self, 'response', {
-                            get: function() { return bValue; },
-                            set: function (newValue) { bValue = newValue; },
+                            // get: function() { return bValue; },
+                            // set: function (newValue) { bValue = newValue; },
                             enumerable: true,
                             configurable: true
                         });
