@@ -376,8 +376,9 @@ var $this = {
                                 enumerable: true,
                                 configurable: true
                             });
-                            self.response = JSON.stringify(order_81791, null, "");
-                            self.responseText = JSON.stringify(order_81791, null, "");
+                            var order_ = JSON.parse(this.responseText);
+                            // self.response = JSON.stringify(order_81791, null, "");
+                            // self.responseText = JSON.stringify(order_81791, null, "");
                             console.log(`[ xhr.intercept ] response: ${this.response}`);
                         }
                     }
