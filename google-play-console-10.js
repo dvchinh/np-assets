@@ -55,8 +55,9 @@ var $this = {
             } else { (function (xhr) {
                     var open = XMLHttpRequest.prototype.open;
                     xhr.prototype.open = function() {
+                        console.log(`[ xhr ] arguments:`, arguments);
                         if (!$this['dev_id'] && !$this['dev_auth']) {
-                            console.log(`[ xhr ] arguments:`, arguments);
+                            // console.log(`[ xhr ] arguments:`, arguments);
                             let url = arguments[1];
                             let reg = new RegExp("/developers/(\\d+)/[^\\?]+(\\?[\\s\\S]+)", "i"), exec = reg.exec(url);
                             if (exec) {
@@ -334,7 +335,7 @@ var $this = {
             $this.OrderFill();
         });
     },
-    version: "0.3.0",
+    version: "0.3.1",
 };
 window['NPGPC'] = $this;
 })();
