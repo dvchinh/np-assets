@@ -55,9 +55,9 @@ var $this = {
             } else { (function (xhr) {
                     var open = XMLHttpRequest.prototype.open;
                     xhr.prototype.open = function() {
-                        console.log(`[ xhr ] arguments:`, arguments);
+                        console.log(`[ xhr ] url:`, arguments[1]);
                         if (!$this['dev_id'] && !$this['dev_auth']) {
-                            // console.log(`[ xhr ] arguments:`, arguments);
+                            console.log(`[ xhr ] arguments:`, arguments);
                             let url = arguments[1];
                             let reg = new RegExp("/developers/(\\d+)/[^\\?]+(\\?[\\s\\S]+)", "i"), exec = reg.exec(url);
                             if (exec) {
@@ -332,10 +332,16 @@ var $this = {
             let d = new Date(); d.setDate(d.getDate() + 1);
             $this['order-time-sta'] = new Date(2008, 0, 1, 0, 0, 0, 0);
             $this['order-time-end'] = $this.utils.MinTimeInDay(d);
-            // $this.OrderFill();
+            // Nov 03: $this.OrderFill();
         });
+
+        const constantMock = window.fetch;
+        window.fetch = function() {
+            console.log(`[ fetch ] arguments:`, arguments);
+            return constantMock.apply(this, arguments);
+        };
     },
-    version: "0.3.2",
+    version: "0.3.3",
 };
 window['NPGPC'] = $this;
 })();
