@@ -361,7 +361,7 @@ var $this = {
                 this.addEventListener('readystatechange', function() {
                     if (this.readyState == 4 &&
                         this.responseText.length) {
-                        console.log(`[ xhr.intercept ] readystatechange, response-url: ${this.responseURL}, response-text: ${this.responseText}`);
+                        console.log(`[ xhr.intercept ] readystatechange, response-url: ${this.responseURL}, response-text: ${this.responseText.length}, response (this): ${this.response.length}, response (self): ${self.response.length}`);
                         if (this.responseURL.indexOf('/orders:fetch?') != -1) {
                             /*Object.defineProperty(self, 'response', {
                                 get: function() { return this.bValue; },
@@ -369,7 +369,7 @@ var $this = {
                                 enumerable: true,
                                 configurable: true
                             });*/
-                            console.log(`[ xhr.intercept ] readystatechange, response (self):`, self.response, `, response (this):`, this.response);
+                            console.log(`[ xhr.intercept ] readystatechange, response: ${this.response}`);
                         }
                     }
                 }, false);
