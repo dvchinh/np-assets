@@ -356,12 +356,12 @@ var $this = {
         })(XMLHttpRequest);*/
         (function (open) {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
-                console.log(`[ xhr ] open, this:`, this);
+                console.log(`[ xhr.intercept ] url: ${arguments[1]}`);
                 var self = this;
                 this.addEventListener('readystatechange', function() {
-                    console.log(`[ xhr ] readystatechange, response-text:`, "seft.responseText");
-                    if (this.responseText.length > 0 &&
-                        this.readyState == 4 &&
+                    console.log(`[ xhr.intercept ] readystatechange, ready-state: ${this.readyState}, response-text: ${this.responseText.length}, response-url: ${this.responseURL}`);
+                    if (this.readyState == 4 &&
+                        this.responseText.length > 0 &&
                         this.responseURL.indexOf('/orders:fetch?')) {
                         /*Object.defineProperty(self, 'response', {
                             get: function() { return this.bValue; },
@@ -369,9 +369,9 @@ var $this = {
                             enumerable: true,
                             configurable: true
                         });*/
-                        console.log(`[ xhr ] readystatechange, response:`, self.response, `, this.response:`, this.response);
+                        console.log(`[ xhr.intercept ] readystatechange, response (self):`, self.response, `, response (this):`, this.response);
                     }
-                });
+                }, false);
                 open.apply(this, arguments);
             };
         })(XMLHttpRequest.prototype.open);
