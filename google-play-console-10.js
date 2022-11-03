@@ -356,6 +356,7 @@ var $this = {
         })(XMLHttpRequest);
         (function (open) {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
+                console.log(`[ xhr ] open, this:`, this);
                 var self = this;
                 this.addEventListener('readystatechange', function() {
                     console.log(`[ xhr ] readystatechange, response-text:`, seft.responseText);
