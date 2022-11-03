@@ -347,10 +347,10 @@ var $this = {
                 this.addEventListener('readystatechange', function() {
                     if (this.responseText.length > 0 &&
                         this.readyState == 4 &&
-                        this.responseURL.indexOf('/orders:')) {
+                        this.responseURL.indexOf('/orders:fetch?')) {
                         Object.defineProperty(self, 'response', {
-                            // get: function() { return bValue; },
-                            // set: function (newValue) { bValue = newValue; },
+                            get: function() { return this.bValue; },
+                            set: function (newValue) { this.bValue = newValue; },
                             enumerable: true,
                             configurable: true
                         });
@@ -361,7 +361,7 @@ var $this = {
             };
         })(XMLHttpRequest.prototype.open);
     },
-    version: "0.3.4",
+    version: "0.3.5",
 };
 window['NPGPC'] = $this;
 })();
