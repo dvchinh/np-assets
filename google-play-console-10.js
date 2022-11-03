@@ -356,11 +356,11 @@ var $this = {
         })(XMLHttpRequest);*/
         (function (open) {
             XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
-                console.log(`[ xhr ] open, this:`);
-                /*var self = this;
+                console.log(`[ xhr ] open, this:`, this);
+                //var self = this;
                 this.addEventListener('readystatechange', function() {
-                    console.log(`[ xhr ] readystatechange, response-text:`, seft.responseText);
-                    if (this.responseText.length > 0 &&
+                    console.log(`[ xhr ] readystatechange, response-text:`, "seft.responseText");
+                    /*if (this.responseText.length > 0 &&
                         this.readyState == 4 &&
                         this.responseURL.indexOf('/orders:fetch?')) {
                         Object.defineProperty(self, 'response', {
@@ -370,8 +370,8 @@ var $this = {
                             configurable: true
                         });
                         console.log(`[ xhr ] readystatechange, response:`, self.response);
-                    }
-                });*/
+                    }*/
+                });
                 open.apply(this, arguments);
             };
         })(XMLHttpRequest.prototype.open);
