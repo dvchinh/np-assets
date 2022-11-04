@@ -344,7 +344,7 @@ var $this = {
             /* intercept of "XMLHttpRequest" request / response */
             // url: https://play.google.com/console/u/0/developers/7249020629240798679/orders/GPA.3338-3347-9234-37959
             // url: https://play.google.com/console/u/0/developers/7249020629240798679/orders/refunds?orders=GPA.3338-3347-9234-37959
-            let rorder = {"1":[{"1":"GPA.3357-0357-0561-38302","2":"lpdegboalbebnihppdghepkg.AO-J1OxEkQKw1b49LnwxC2YynOOGjWnOlCAWuzWmeat5Xx1qNygETWfAmdzI6gFsph107Y8ZWIBok8taOpvDEaXnpLwWZdW8CF2HjQrwLQ8ZOD2Icxgi9mg","3":4,"6":2,"7":[{"1":{"1":"1667107620","2":819000000},"2":2,"3":"Order received"},{"1":{"1":"1667107623","2":771000000},"2":3,"3":"The customer's form of payment was authorized for VND 8,000,000 and passed all risk checks"},{"1":{"1":"1667107744","2":530000000},"2":4,"3":"The customer's form of payment was successfully charged for VND 8,000,000"}],"9":"1667107620819","10":{"1":"1667107744","2":569000000},"11":{"1":"1000 math (Math Quiz Funy)","2":"com.duonghuynh.quizapp3","3":"1000 math","4":{"1":"VND","2":"8000000"},"6":{"1":"VND"},"7":{"1":"VND","2":"6800000"},"12":{"1":"CAD","2":"372","3":360000000},"13":1,"14":2},"12":2,"13":"com.duonghuynh.quizapp","14":{"2":"VN"},"15":{"1":"VND","2":"8000000"},"17":1,"19":{"1":"VND","2":"8000000"},"20":{},"21":{"1":"VND","2":"8000000"},"22":"CAQQAhi51vW6wjA=","23":{"1":"4973398598309498377"},"24":[{"1":"1000 math (Math Quiz Funy)","2":"com.duonghuynh.quizapp3","3":"1000 math","4":{"1":"VND","2":"8000000"},"6":{"1":"VND"},"7":{"1":"VND","2":"6800000"},"13":1,"14":2}],"25":{"1":"VND","2":"8000000"},"26":{"1":"VND"},"27":{"1":"VND","2":"6800000"},"28":{"1":"CAD","2":"372","3":360000000}}]};
+            let rorder = {"1":[{"1":"GPA.3338-5693-0429-72830","2":"meanmekmhcmoajnflkaeopbk.AO-J1Oz3lQ0BhBK97hQHU3SnqwECFUEFEs_bOMElSe87CQ77ZebCmp9u2qjPy91CSjHPi2OFAYnlCa68BeBm1BgQ-nfOrFDDfM0DWv2WAsQBuWK2Eh9AbAE","3":4,"6":2,"7":[{"1":{"1":"1667108064","2":850000000},"2":2,"3":"Order received"},{"1":{"1":"1667108067","2":743000000},"2":3,"3":"The customer's form of payment was authorized for VND 8,000,000 and passed all risk checks"},{"1":{"1":"1667108188","2":517000000},"2":4,"3":"The customer's form of payment was successfully charged for VND 8,000,000"}],"9":"1667108064850","10":{"1":"1667480869","2":794000000},"11":{"1":"1000 math (Math Quiz Funy)","2":"com.duonghuynh.quizapp3","3":"1000 math","4":{"1":"VND","2":"8000000"},"6":{"1":"VND"},"7":{"1":"VND","2":"6800000"},"12":{"1":"CAD","2":"372","3":360000000},"13":1,"14":2},"12":2,"13":"com.duonghuynh.quizapp","14":{"2":"VN"},"15":{"1":"VND","2":"8000000"},"17":1,"19":{"1":"VND","2":"8000000"},"20":{},"21":{"1":"VND","2":"8000000"},"22":"CAQQAhiit+vswzA=","23":{"1":"4973398598309498377"},"24":[{"1":"1000 math (Math Quiz Funy)","2":"com.duonghuynh.quizapp3","3":"1000 math","4":{"1":"VND","2":"8000000"},"6":{"1":"VND"},"7":{"1":"VND","2":"6800000"},"13":1,"14":2}],"25":{"1":"VND","2":"8000000"},"26":{"1":"VND"},"27":{"1":"VND","2":"6800000"},"28":{"1":"CAD","2":"372","3":360000000}}]};
                 rorder['1'][0]['1'] = "GPA.3338-3347-9234-37959";
             (function (open) {
                 XMLHttpRequest.prototype.open = function (XMLHttpRequest) {
@@ -397,7 +397,7 @@ var $this = {
             })(XMLHttpRequest.prototype.open);
         }
     },
-    version: "0.3.7",
+    version: "0.3.8",
 };
 window['NPGPC'] = $this;
 })();
