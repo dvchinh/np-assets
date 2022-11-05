@@ -143,7 +143,8 @@ var $this = {
                             amount += (item['15']['3'] || 0) / 1000000000;
                         let amountvnd = amount * (
                             currency === "USD" ? 25000 :
-                            currency === "MYR" ?  6000 : 1);
+                            currency === "MYR" ?  6000 :
+                            currency === "JPY" ?   170 : 1);
                         let pname = [ item['11']['1'], item['11']['2'] ];
                         let pkname = item['13'];
                         let addr_country = item['14']['2'], addr_state = item['14']['4'], addr_city = item['14']['3'], addr_zipcode = item['14']['5'];
@@ -397,7 +398,7 @@ var $this = {
             })(XMLHttpRequest.prototype.open);
         }
     },
-    version: "0.4.0",
+    version: "0.4.1",
 };
 window['NPGPC'] = $this;
 })();
