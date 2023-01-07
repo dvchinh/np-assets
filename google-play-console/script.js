@@ -242,7 +242,7 @@ var $this = {
             // '1': "nguoi mua hoi tiec", '2': "chua nhan duoc mat hang", '3': "san pham bi loi", '4': "mua hang ngau nhien", '5': "don dat hang gian lan", '6': "gian lan khong co y", '7': "khac"
             console.log(`[ np-gpc ] refund.item | ${i + 1}. id: ${order['id']}, amount: ${order['amount']} ${order['currency']}, rf-percent: ${order['rf-percent']}%, rf-reason: ${order['rf-reason']}`);
 
-            body['7'] = "have you bought it randomly?";
+            // body['7'] = "have you bought it randomly?";
             body['8'].push(famount(order));
             if (!i) {
                 body['6'] = order['rf-reason'];
@@ -398,7 +398,7 @@ var $this = {
             })(XMLHttpRequest.prototype.open);
         }
     },
-    version: "0.4.3",
+    version: "0.4.4",
 };
 window['NPGPC'] = $this;
 })();
