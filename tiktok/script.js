@@ -58,7 +58,7 @@ var TikTok = {
       item['desc'] = ddesc?.innerText;
       item['views'] = dmain.querySelector("[data-e2e='video-views']").innerHTML;
       item['cover'] = dmain.querySelector("img").getAttribute("src");
-      let match = item['url'].match(/@(\w+)\/video\/(\d+)/);
+      let match = item['url'].match(/@([\w\.]+)\/video\/(\d+)/);
       item['uid'] = match[2];
       item['author-slug'] = match[1];
       return item;
