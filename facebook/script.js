@@ -4,6 +4,19 @@ var Utils = {
     if ('undefined' === typeof ms) { ms = 1000; }
     return new Promise(resolve => setTimeout(resolve, ms));
   },
+  newGuid: () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  },
+  sanitizeHash: (text) => {
+    let value = text;
+    if (value) {
+      value = value.replace(/(\S)#/g, '$1 #');
+    }
+    return value;
+  },
   getUrlInfo: (pUrl) => {
     let url = (pUrl !== undefined && pUrl !== null) ? pUrl : window.location.href;
     let reg = new RegExp("(((https?):)?\/\/([^\/?#]+))?(\/[^?#]*)?(\\?[^#]*)?", "gi"), exec = reg.exec(url);
@@ -110,7 +123,7 @@ var Facebook = {
     if (location.pathname !== page_home) {
       location.href = page_home;
       do {
-        console.warn('%s| waiting...(make-up artist)', new Date().toJSON());
+        console.warn('%s | waiting...(make-up artist)', new Date().toJSON());
         await util.timeout();
       } while (location.pathname !== page_home);
     }
@@ -127,26 +140,32 @@ var Facebook = {
     do {
       let ui = $this.extractUI();
       if (ui['reel-create']?.['step'] !== 1) {
-        console.warn('%s| waiting...(sellout)', new Date().toJSON());
+        console.warn('%s | waiting...(sellout)', new Date().toJSON());
         await util.timeout();
       } else { break; }
     } while (true);
     console.log('[ facebook ] reel-create-step-1st:finish');
   },
-  reelCreateS2Upload: async () => {
+  reelCreateS2Upload: async (task) => {
     console.log('[ facebook ] reel-create-step-2nd:start');
     const util = Utils;
     const $this = Facebook;
     let dtext = util.getElementsByText('thêm video')[0];
     let darea = dtext.closest('[tabindex]');
     let dfile = darea.previousSibling;
-    dfile.setAttribute('name', 'np-upload-reel');
+    dfile.setAttribute('name', 'np-reel-upload');
+    let value = `D:\\Projects\\np-tiktok\\video\\@quachanh91\\${task['input']['video-uid']}.mp4`;
+    main.add('wdriver', {
+      'event': 'send.keys',
+      'value': value,
+      'selector': '[name="np-reel-upload"]'
+    });
 
     do {
       let ui = $this.extractUI();
       if (ui['reel-create']?.['step'] !== 1 ||
          !ui['reel-create']?.['next-active']) {
-        console.warn('%s| waiting...(so dumb)', new Date().toJSON());
+        console.warn('%s | waiting...(so dumb)', new Date().toJSON());
         await util.timeout();
       } else { break; }
     } while (true)
@@ -161,7 +180,7 @@ var Facebook = {
     dnext.dispatchEvent(new Event('click', { bubbles: true }));
 
     while (ui['reel-create']?.['step'] !== 2) {
-      console.warn('%s| waiting...(dispatch)', new Date().toJSON());
+      console.warn('%s | waiting...(dispatch)', new Date().toJSON());
       await util.timeout();
       ui = $this.extractUI();
     }
@@ -176,22 +195,29 @@ var Facebook = {
     dnext.dispatchEvent(new Event('click', { bubbles: true }));
 
     while (ui['reel-create']?.['step'] !== 3) {
-      console.warn('%s| waiting...(quite a while)', new Date().toJSON());
+      console.warn('%s | waiting...(quite a while)', new Date().toJSON());
       await util.timeout();
       ui = $this.extractUI();
     }
     console.log('[ facebook ] reel-create-step-4th:finish');
   },
-  reelCreateS5Desc: async () => {
+  reelCreateS5Desc: async (task) => {
     console.log('[ facebook ] reel-create-step-5th:start');
     const util = Utils;
     const $this = Facebook;
     let ui = $this.extractUI();
     let ddesc = ui['reel-create']['d-desc'];
-    ddesc.setAttribute('name', 'np-describe-reel');
+    ddesc.setAttribute('name', 'np-reel-describe');
+    let value = util.sanitizeHash(task['input']['video-desc']);
+    main.add('wdriver', {
+      'event': 'send.keys',
+      'value': value,
+      'options': { 'individual': { 'delay': 10 } },
+      'selector': '[name="np-reel-describe"]'
+    });
 
     while (ddesc.getAttribute('np-status') !== 'done') {
-      console.warn('%s| waiting...(respective)', new Date().toJSON());
+      console.warn('%s | waiting...(respective)', new Date().toJSON());
       await util.timeout();
     }
     console.log('[ facebook ] reel-create-step-5th:finish');
@@ -205,33 +231,76 @@ var Facebook = {
     dpost.dispatchEvent(new Event('click', { bubbles: true }));
 
     let r_id; while (!r_id) {
-      console.warn('%s| waiting...(bowl)', new Date().toJSON());
+      console.warn('%s | waiting...(bowl)', new Date().toJSON());
       await util.timeout();
       ui = $this.extractUI();
       r_id = ui['reel-create']?.['id'];
     }
     console.log('[ facebook ] reel-create-step-6th:finish, reel-id = %s', r_id);
+    return r_id;
   },
-  reelsCreateS7Info: () => {
-    let rid = '';
-    let path = location.pathname;
-    let match = path.match(/\/reel\/(\d+)/);
-    if (match) {
-      rid = match[1];
-    }
-    return rid;
-  },
-  reelCreate: async () => {
+  reelCreate: async (task) => {
     const $this = Facebook;
+    task['status'] = 'processing';
+    console.log('[ facebook ] reel-create:start, task =', task);
     await $this.navToHome();
     await $this.reelCreateS1Start();
-    await $this.reelCreateS2Upload();
+    await $this.reelCreateS2Upload(task);
     await $this.reelCreateS3Next();
     await $this.reelCreateS4Next();
-    await $this.reelCreateS5Desc();
-    await $this.reelCreateS6Post();
+    await $this.reelCreateS5Desc(task);
+    let rid = await $this.reelCreateS6Post();
+    task['output'] = { 'reel-id': rid };
+    task['status'] = 'processed';
+    console.log('[ facebook ] reel-create:finish, task =', task);
   },
 };
+var Main = function() {
+  this.queue = new Map([]);
+  this.interval = 0;
+};
+Main.prototype.add = function (type, input) {
+  let id = Utils.newGuid();
+  let item = { type, input, 'status': '' };
+  this.queue.set(id, item);
+  console.log('[ main ] add, id = %s, type = %s, input = %s', id, type, JSON.stringify(input, null, 0));
+};
+Main.prototype.check = async function() {
+  const fb = Facebook;
+  console.warn('%s | main.check, checking...(technique)', new Date().toJSON());
+  for (let [key, item] of this.queue) {
+    let type = item['type'];
+    let status = item['status'];
+    if (type === 'facebook-reel-create') {
+      if (status === '') {
+        fb.reelCreate(item);
+      }
+    }
+    if (type === 'wdriver') {
+      if (status === '') {}
+    }
+  }
+};
+Main.prototype.start = function() {
+  this.interval = setInterval(this.check.bind(this), 1000);
+  console.log('[ main ] start, interval = %d', this.interval);
+};
+Main.prototype.wdriverList = function() {
+  let list = [];
+  for (let [key, value] of this.queue) {
+    let { type, status } = value;
+    if (type === 'wdriver' && status === '') {
+      list.push([ key, value ]);
+    }
+  }
+  return list;
+};
+Main.prototype.wdriverUpdate = function (key, value) {
+  let item = this.queue.get(key);
+  Object.assign(item, value);
+}
+var main = new Main(); main.start();
 window['NPUtils'] = Utils;
 window['NPFacebook'] = Facebook;
+window['NPMain'] = main;
 })();
