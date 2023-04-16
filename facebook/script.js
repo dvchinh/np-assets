@@ -25,6 +25,14 @@ var Utils = {
       return v.toString(16);
     });
   },
+  wait: async (fn) => {
+    const $this = Utils;
+    let done = false;
+    do {
+       done = await fn();
+      !done && await $this.timeout();
+    } while (!done);
+  },
   timeout: (ms) => {
     if ('undefined' === typeof ms) { ms = 1000; }
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -97,9 +105,9 @@ var Utils = {
     return exec[1] + (array.length ? "?" : "") + array.join("&") + ('undefined' !== typeof exec[3] ? exec[3] : "");
   },
   isVisible: (element) => {
-    if (element &&
+    if (element && (
         element.offsetWidth !== 0 ||
-        element.offsetHeight !== 0) {
+        element.offsetHeight !== 0)) {
       return true;
     }
     return false;
@@ -152,12 +160,25 @@ var Utils = {
 };
 Utils.prototypeInit();
 var Facebook = {
+  config: {},
+  configSet: (task) => {
+    const $this = Facebook;
+    task['status'] = 'processing';
+    console.log('[ facebook ] config-set:start, task =', task);
+    let config = JSON.parse(JSON.stringify(task['input']));
+    delete config['dispatcher'];
+    Object.assign($this.config, config);
+    task['status'] = 'processed';
+    console.log('[ facebook ] config-set:finish, task =', task);
+    document.dispatchEvent(new CustomEvent('fb:config', { bubbles: true, detail: task }));
+  },
   extractUI: () => {
     const util = Utils;
     let output = {};
     let url = util.getUrlInfo(location.href)['relative'];
     let match;
-    if (/^\/reels\/create\/\?page_id=\d+&surface=PAGES$/.test(url)) {
+    if (/^\/reels\/create\/\?page_id=\d+&surface=PAGES$/.test(url) ||
+       (/^\/reels\/create\/\?surface=ADDL_PROFILE_PLUS$/.test(url))) {
       let create = {};
 
       let dprogress = util.getElementsByFn(element => {
@@ -187,7 +208,14 @@ var Facebook = {
         create['post-active'] = dpost.getAttribute('tabindex') === '0';
       }
 
-      let ddesc = document.querySelectorAll('[tabindex][role="textbox"]')[0];
+      let ddesc = Array.from(document.querySelectorAll('[tabindex][role="textbox"]')).filter(element => {
+        let label = (element.getAttribute('aria-label') || '').toLowerCase();
+        if (label === 'mô tả thước phim của bạn...' &&
+            util.isVisible(element)) {
+          return true;
+        }
+        return false;
+      })[0];
       if (ddesc) {
         create['d-desc'] = ddesc;
       }
@@ -239,6 +267,17 @@ var Facebook = {
       });
       detail['comments'] = comments;
 
+      let dlike_ico = util.getElementsByFn(element => {
+        let label = (element.getAttribute('aria-label') || '').toLowerCase();
+        if (['thích', 'nút thích đang hoạt động'].includes(label)) {
+          return true;
+        }
+        return false;
+      })[0];
+      if (dlike_ico) {
+        detail['d-like-ico'] = dlike_ico;
+      }
+
       let dcomment_ico = util.getElementsByFn(element => {
         let label = (element.getAttribute('aria-label') || '').toLowerCase();
         if (label == 'bình luận') {
@@ -268,8 +307,8 @@ var Facebook = {
   },
   navToHome: async () => {
     const util = Utils;
-    let page_user = 'quachanhquachanh91';
-    let page_home = `/${page_user}`;
+    const $this = Facebook;
+    let page_home = `/${$this.config['page']['user']}`;
     console.log('[ facebook ] nav-to-home:start, url = %s', util.getUrlInfo(location.href)['relative']);
     if (location.pathname !== page_home) {
       location.href = page_home;
@@ -324,7 +363,7 @@ var Facebook = {
     let darea = dtext.closest('[tabindex]');
     let dfile = darea.previousSibling;
     dfile.setAttribute('name', 'np-reel-upload');
-    let value = `D:\\Projects\\np-tiktok\\video\\@quachanh91\\edited\\${task['input']['video-uid']}.mp4`;
+    let value = task['input']['video-path'];
     main.add('wdriver', {
       'event': 'send.keys',
       'value': value,
@@ -450,6 +489,7 @@ var Facebook = {
       task['status'] = 'processed';
     }
     console.log('[ facebook ] reel-create:finish, task =', task);
+    document.dispatchEvent(new CustomEvent('fb:reel-create', { bubbles: true, detail: task }));
   },
   reelCommentS1Start: async () => {
     console.log('[ facebook ] reel-comment-step-1st:start');
@@ -504,6 +544,23 @@ var Facebook = {
     console.log('[ facebook ] reel-comment-step-3rd:finish, comment-id = %s', c_id);
     return c_id;
   },
+  reelCommentS4Like: async () => {
+    console.log('[ facebook ] reel-comment-step-4th:start');
+    const util = Utils;
+    const $this = Facebook;
+    let ui = $this.extractUI();
+    let dico = ui['reel']['d-like-ico'];
+    if (dico.getAttribute('aria-label').toLowerCase() === 'thích') {
+      dico.dispatchEvent(new Event('click', { bubbles: true }));
+    }
+
+    await util.wait(function() {
+      ui = $this.extractUI();
+      dico = ui['reel']['d-like-ico'];
+      return dico.getAttribute('aria-label').toLowerCase() === 'nút thích đang hoạt động';
+    });
+    console.log('[ facebook ] reel-comment-step-4th:finish');
+  },
   reelComment: async (task) => {
     const $this = Facebook;
     task['status'] = 'processing';
@@ -511,9 +568,12 @@ var Facebook = {
     await $this.navToReel(task['input']['reel-id']);
     await $this.reelCommentS1Start();
     await $this.reelCommentS2Write(task);
-    await $this.reelCommentS3Post();
+    let cid = await $this.reelCommentS3Post();
+    await $this.reelCommentS4Like();
+    task['output'] = { 'comment-id': cid };
     task['status'] = 'processed';
     console.log('[ facebook ] reel-comment:finish, task =', task);
+    document.dispatchEvent(new CustomEvent('fb:reel-comment', { bubbles: true, detail: task }));
   },
 };
 var Main = function() {
@@ -533,6 +593,8 @@ Main.prototype.check = async function() {
   for (let [key, item] of this.queue) {
     let { type, status, recheck } = item;
     let fn; switch (type) {
+      case 'facebook-config-set':
+        fn = fb.configSet; break;
       case 'facebook-reel-create':
         fn = fb.reelCreate; break;
       case 'facebook-reel-comment':
@@ -559,19 +621,20 @@ Main.prototype.start = function() {
     console.log('[ window ] event:unload');
   });*/
 };
-Main.prototype.store = function () {
-  const util = Utils;
+Main.prototype.store = function() {
+  const util = Utils, fb = Facebook;
   if (typeof(Storage) === 'undefined') {
-      console.warn('Sorry ! No Web Storage support...'); return;
+    console.warn('Sorry ! No Web Storage support...'); return;
   }
   let store = {
-    'queue': this.queue
+    'queue': this.queue,
+    'config': fb.config
   };
   let value = JSON.stringify(store, util.jsonReplacer, 0);
   sessionStorage.setItem(this.storageName, value);
 };
-Main.prototype.restore = function(name) {
-  const util = Utils;
+Main.prototype.restore = function() {
+  const util = Utils, fb = Facebook;
   if (typeof(Storage) === 'undefined') {
     console.warn('Sorry ! No Web Storage support...'); return;
   }
@@ -581,6 +644,7 @@ Main.prototype.restore = function(name) {
     value['recheck'] = true;
   }
   this.queue = new Map([...this.queue, ...queue]);
+  Object.assign(fb.config, store?.['config']);
 },
 Main.prototype.wdriverList = function() {
   let list = [];

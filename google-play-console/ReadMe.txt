@@ -3,7 +3,7 @@
 -. Extension: cjs (Custom JavaScript)
   > https://chrome.google.com/webstore/detail/custom-javascript-for-web/ddbjnfjiigjmcpcpkmhogomapikjbjdk
   > snippet: console.log(`[ np-gpc ] cjs`);
-  > external: //cdn.jsdelivr.net/gh/dvchinh/assets@0dfae9d/google-play-console/script.js
+  > external: //cdn.jsdelivr.net/gh/dvchinh/np-assets@d67149f/google-play-console/script.js
 
 -. DevTools:
   > NPGPC['orders-rf'][1]['rf-percent'] = 50;
