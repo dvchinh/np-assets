@@ -297,7 +297,13 @@ var Facebook = {
     console.log('[ facebook ] reel-create-step-1st:start');
     const util = Utils;
     const $this = Facebook;
-    let dtext = util.getElementsByText('thước phim')[0];
+    let dtext; do {
+      await util.timeout();
+      dtext = util.getElementsByText('thước phim')[0];
+      if (!dtext) {
+        console.warn('%s | waiting...(personal income tax finalization)', new Date().toJSON());
+      }
+    } while (!dtext);
     let darea = dtext?.closest('[tabindex]');
     darea.dispatchEvent(new Event('click', { bubbles: true }));
 
@@ -318,7 +324,7 @@ var Facebook = {
     let darea = dtext.closest('[tabindex]');
     let dfile = darea.previousSibling;
     dfile.setAttribute('name', 'np-reel-upload');
-    let value = `D:\\Projects\\np-tiktok\\video\\@quachanh91\\${task['input']['video-uid']}.mp4`;
+    let value = `D:\\Projects\\np-tiktok\\video\\@quachanh91\\edited\\${task['input']['video-uid']}.mp4`;
     main.add('wdriver', {
       'event': 'send.keys',
       'value': value,
@@ -431,9 +437,10 @@ var Facebook = {
         task['status'] = 'error';
       }
     }
+    /* [deprecated]
     if (task['status'] !== 'error') {
       await $this.reelCreateS4Next();
-    }
+    }*/
     if (task['status'] !== 'error') {
       await $this.reelCreateS5Desc(task);
     }
