@@ -90,12 +90,14 @@ Ctrl.prototype.check = function() {
       });
     }
     if (status === 'create:success') {
-      item['status'] = 'comment:start';
-      this.main.add('facebook-reel-comment', {
-        'reel-id': item['reel']['id'],
-        'comment-body': info['reel-comment'],
-        'dispatcher': key
-      });
+      if (info['reel-comment']) {
+        item['status'] = 'comment:start';
+        this.main.add('facebook-reel-comment', {
+          'reel-id': item['reel']['id'],
+          'comment-body': info['reel-comment'],
+          'dispatcher': key
+        });
+      }
     }
   }
 };
@@ -136,20 +138,44 @@ Ctrl.prototype.getInfo = function(reel) {
       reel_comment = 'Tất cả đồ Q.Ánh dùng có tại 👇 https://shorten.asia/HDtaCfUK';
       break;
     case 'giaydeprl':
-      /* v1:
+      /* v1: 
+      edited = false;
       user_tt = 'rianlian89';
       reel_desc = 'Sản phẩm 👉 https://shorten.asia/egNPd5DW | $[video-desc]';
       reel_comment = 'Mã giảm giá + Sản phẩm: https://shorten.asia/qh8Faddj';*/
+      /* v2: 
+      edited = false;
+      user_tt = 'rianlian89';
+      reel_desc = '$[video-desc]';
+      reel_comment = 'Mã giảm giá + Sản phẩm: https://shorten.asia/qh8Faddj';*/
+      /* v3: 
       edited = false;
       user_tt = 'lovefish1607';
       reel_desc = '$[video-desc]';
-      reel_comment = 'Mã giảm giá + Sản phẩm: https://shorten.asia/qh8Faddj';
+      reel_comment = 'Mã giảm giá + Sản phẩm: https://shorten.asia/qh8Faddj';*/
       break;
     case 'the.beauty.fish':
+      /* v1:
       edited = false;
       user_tt = 'lovefish1607';
       reel_desc = '$[video-desc]';
-      reel_comment = 'Mã giảm giá + Sản phẩm: https://shorten.asia/TrurnKTD'
+      reel_comment = 'Mã giảm giá + Sản phẩm: https://shorten.asia/TrurnKTD';*/
+      edited = false;
+      user_tt = 'gadaubac.tiktok';
+      reel_desc = '$[video-desc]';
+      reel_comment = '';
+      break;
+    case 'cuoi.vn.plus':
+      /* v1:
+      edited = false;
+      user_tt = 'vo_tong_danh_meo';
+      reel_desc = 'Link 👉 https://shorten.asia/nZpAZWD1 | $[video-desc]';
+      reel_comment = 'Mọi người yêu quý nhấp 👇 ủng hộ mình ra thêm nhiều video nhé: https://shorten.asia/MwBxUcfp';*/
+      edited = false;
+      user_tt = 'vo_tong_danh_meo';
+      reel_desc = '$[video-desc] | Link 👉 https://shorten.asia/nZpAZWD1';
+      reel_comment = 'Mọi người yêu quý nhấp 👇 ủng hộ mình ra thêm nhiều video nhé: https://shorten.asia/MwBxUcfp';
+      break;
     default:;
   }
   reel_desc = reel_desc.replace('$[video-desc]', video['desc']);
