@@ -340,8 +340,12 @@ Facebook.prototype.extractUIStoreF = function ({ uinfo }) {
     let detail = {};
     detail['id'] = match[1];
 
-    let $video = document.querySelector('[data-pagelet="Reels"]');
-    if (!$video) { $video = document.querySelector('[data-video-id]'); }
+    let $video = Array.from(document.querySelectorAll('[data-pagelet="Reels"]'))
+      .filter(x => this.util.isVisible(x))[0];
+    if (!$video) {
+      $video = Array.from(document.querySelectorAll('[data-video-id]'))
+        .filter(x => this.util.isVisible(x))[0];
+    }
     let $cover = $video.closest('[role="button"]').querySelector('.__fb-dark-mode');
     let $desc = $cover.querySelector('span[dir="auto"]');
     detail['desc'] = $desc.innerText;
@@ -359,7 +363,19 @@ Facebook.prototype.extractUIStoreF = function ({ uinfo }) {
           comment['id'] = this.util.getUrlParameter('comment_id', url);
           comment['author'] = { 'slug': author_slug, 'name': author_name };
           comment['created-at'] = match[2];
-          comment['d-comment'] = element;
+          comment['$comment'] = element;
+          element.querySelectorAll('[role="button"][tabindex]').forEach($btn => {
+            let label = ($btn.innerText || $btn.ariaLabel).toLowerCase();
+            if (label === 'thử lại') {
+              comment['$retry'] = $btn;
+            }
+            if (label === 'chỉnh sửa') {
+              comment['$edit'] = $btn;
+            }
+            if (label === 'chỉnh sửa hoặc xóa bình luận này') {
+              comment['$options'] = $btn;
+            }
+          });
           comments.push(comment);
           return true;
         }
@@ -427,6 +443,32 @@ Facebook.prototype.extractUIStoreF = function ({ uinfo }) {
     });
 
     output['home'] = { 'reels': reels };
+  }
+
+  let $menu = document.querySelector('[role="menu"]');
+  if ($menu) {
+    let menu = {};
+    menu['$'] = $menu;
+    let list = [];
+    for (let $item of $menu.querySelectorAll('[role="menuitem"]')) {
+      let item = { '$': $item };
+      item['name'] = $item.innerText;
+      list.push(item);
+    }
+    menu['list'] = list;
+    output['menu'] = menu;
+  }
+
+  let $dialog = document.querySelector('[role="dialog"][aria-labelledby^=":r"]');
+  if ($dialog) {
+    let dialog = {};
+    dialog['$'] = $dialog;
+    let $title = $dialog.querySelector('h2[dir="auto"]'),
+        $content = $title.closest('[aria-hidden="false"]').nextSibling;
+    dialog['title'] = $title.innerText;
+    dialog['content'] = $content.innerText;
+    dialog['$ok'] = $dialog.querySelector('[role="button"][aria-label="OK"]');
+    output['dialog'] = dialog;
   }
 
   let $profile_img = this.util.getElementsByFn(element => {
@@ -810,7 +852,7 @@ Facebook.prototype.reelCreate = async function (task) {
   task['start-at'] = task['start-at'] || new Date();
   console.log('[ facebook ] reel-create:start, task =', task);
   let puser = task['input']['profile-user'];
-  let time_max = 5 * 60;
+  let time_max = 5 * 60 * 99;
   let time_elapsed = new Date() - task['start-at'];
   let timeout = setTimeout(() => {
     task['output'] = { 'message': `Task timed out after ${time_max} seconds.` };
@@ -889,10 +931,10 @@ Facebook.prototype.reelCommentS2Write = async function (task) {
     'selector': '[name="np-reel-comment"]'
   });
 
-  while (deditor.getAttribute('np-status') !== 'done') {
+  await this.util.wait(() => {
     console.warn('%s | waiting...(How is everything there?)', new Date().toJSON());
-    await this.util.timeout();
-  }
+    return deditor.getAttribute('np-status') === 'done';
+  });
   console.log('[ facebook ] reel-comment-step-2nd:finish');
 };
 Facebook.prototype.reelCommentS3Post = async function() {
@@ -901,12 +943,21 @@ Facebook.prototype.reelCommentS3Post = async function() {
   let deditor = ui['reel']['d-comment-editor'];
   deditor.dispatchEvent(new KeyboardEvent('keydown', { keyCode: 13, view: window, bubbles: true, cancelable: true }));
 
-  let c_id; while (!c_id) {
+  let c_id; await this.util.wait(async () => {
     console.warn('%s | waiting...(My big pleasure)', new Date().toJSON());
-    await this.util.timeout();
     ui = this.extractUI();
+    let dialog = ui['dialog'];
+    if (dialog) {
+      console.log('[ facebook ] dialog, title = %s, content = %s', dialog['title'], dialog['content']);
+      dialog['$ok'].dispatchEvent(new Event('click', { bubbles: true }));
+      await this.util.wait(() => {
+        console.warn('%s | waiting...(boarding pass)', new Date().toJSON());
+        return !document.contains(dialog['$']);
+      });
+    }
     c_id = ui['reel']?.['comments'][0]?.['id'];
-  }
+    return /^(?!client:)\w+/g.test(c_id);
+  });
   console.log('[ facebook ] reel-comment-step-3rd:finish, comment-id = %s', c_id);
   return c_id;
 };
@@ -1110,7 +1161,11 @@ var Main = function() {
 };
 Main.prototype.add = function (type, input) {
   let id = this.util.newGuid();
-  let item = { type, input, 'status': '', 'steps': [] };
+  let item = {
+    type, input,
+    'status': '', 'steps': [],
+    'created-at': new Date(),
+  };
   this.queue.set(id, item);
   console.log('[ main ] add, id = %s, type = %s, input = %s', id, type, JSON.stringify(input, null, 0));
 };
@@ -1280,9 +1335,14 @@ Main.prototype.restoreFromServer = async function() {
   let queue = store?.['queue'] || [];
   for (let [key, value] of queue) {
     value['recheck'] = true;
+    let time_created = value['created-at'] || 0,
+        time_elapsed = new Date() - time_created;
+    if (time_elapsed > 15 * 60 * 1000) {
+      queue.delete(key);
+    }
   }
   this.queue = new Map([...this.queue, ...queue]);
-  this.facebook.setConfig(store?.['config']);
+  // -: this.facebook.setConfig(store?.['config']);
   console.warn('[ restore.server ] store =', store);
   return store;
 };

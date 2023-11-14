@@ -216,7 +216,12 @@ Ctrl.prototype.list = async function() {
     });
     $pnext = $pager.querySelector('[aria-label="Next page"]');
     let stop = false; do {
-      const $list = document.querySelector('.v-item-group');
+      let $list = null;
+      await this.util.wait(function() {
+        console.warn('%s | waiting...(our "db" equivalent)', new Date().toJSON());
+        $list = document.querySelector('.v-item-group');
+        return $list;
+      });
       for (let $item of $list.querySelectorAll('.v-expansion-panel')) {
         let club = {};
         let $header = $item.querySelector('.v-expansion-panel-header');
@@ -229,18 +234,23 @@ Ctrl.prototype.list = async function() {
           $content = $item.querySelector('.v-expansion-panel-content');
           return $content;
         });
-        club['name'] = $header.innerText;
+        club['name'] = $header.querySelector('strong').innerText;
         club['zone'] = this.util.getElementsByText('zone', $content)[0].closest('div').nextElementSibling.innerText;
-        club['address'] = $content.querySelector('.v-list-item__title').innerText;
-        let addr_match = club['address'].match(/(?!\s)[^,]+(?!\s)/g);
-        club['addr-state'] = addr_match[2];
+        // e.g: address = '5000 Mitty Way, San Jose, California, United States of America, 95129'
+        // e.g: address = '4005 Manzanita Ave Ste 6, Pmb 240, Carmichael, California, United States of America, 95608'
+        club['address'] = $content.querySelector('.v-list-item__title')?.innerText;
+        let addr_match = club['address']?.match(/(?!\s)[^,]+(?!\s)/g);
+        if (addr_match?.length) {
+          club['addr-state'] = addr_match[addr_match.length - 3];
+          club['addr-zipcode'] = addr_match[addr_match.length - 1];
+        }
         club['contact-email'] = this.util.getElementsByText('club email address', $content)[0].closest('div').nextElementSibling.innerText;
         club['website'] = this.util.getElementsByText('pool site', $content)[0].closest('div').nextElementSibling.innerText;
         club['url'] = `url:${host}/club.${this.util.newGuid()}`;
         club['host'] = host;
         club['content'] = $item.outerHTML;
         items.push(club);
-        console.log('club = %s', club['name']);
+        console.log('club = %s,', club['name'], club);
       }
       stop = $pnext.disabled;
       if (!stop) {
